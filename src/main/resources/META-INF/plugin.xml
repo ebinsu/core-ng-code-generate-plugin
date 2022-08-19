@@ -1,0 +1,34 @@
+<idea-plugin>
+    <id>org.example.core-ng-code-generate-plugin</id>
+    <name>Plugin display name here</name>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description><![CDATA[
+    Enter short description for your plugin here.<br>
+    <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="builder" class="core.framework.plugin.BuilderGenerator" text="Builder"
+                description="Generate builder method">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action id="SetBeanPropertiesGenerator" class="core.framework.plugin.SetBeanPropertiesGenerator"
+                text="Set Properties" description="Set bean properties">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action id="DomainToSqlFileGenerator" class="core.framework.plugin.DomainToSqlFileGenerator" text="New Sql File For Domain"
+                description="Domain to sql file" icon="AllIcons.FileTypes.Text">
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
