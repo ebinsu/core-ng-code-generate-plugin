@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,6 +42,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<LocalV
         this.methodBlock = methodBlock;
         this.statement = statement;
         this.fields = fields;
+        Collections.reverse(listValues);
         init("Select Local Variable To Set Properties :", listValues, null);
     }
 
@@ -60,20 +62,24 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<LocalV
         PsiElementFactory elementFactory = PsiElementFactory.getInstance(project);
         List<PsiStatement> statements = new ArrayList<>();
         for (LocalVariableFiledBean field : fields) {
-            if (field.isEnum() && !selectedValue.isSameVariableType(field.field)) {
-                String statement = String.format(SET_ENUM_TEMPLATE, localVariable.getName(), field.getName(), selectValueName, field.getTypeClass().getName());
-                statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
-            } else if (field.isList()) {
-                String statement = String.format(SET_LIST_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
-                statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
-            } else if (field.isSet()) {
-                String statement = String.format(SET_SET_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
-                statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
-            } else if (field.isJavaBean() && !selectedValue.isSameVariableType(field.field)) {
-                String setDifferentBeanStatement = String.format(SET_DIFFERENT_BEAN_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
-                statements.add(elementFactory.createStatementFromText(setDifferentBeanStatement, psiFile.getContext()));
-            } else {
+            if (selectedValue.isSameVariableType(field.field)) {
                 statements.add(elementFactory.createStatementFromText(String.format(COPY_TEMPLATE, localVariable.getName(), field.getName(), selectValueName), psiFile.getContext()));
+            } else {
+                if (field.isEnum()) {
+                    String statement = String.format(SET_ENUM_TEMPLATE, localVariable.getName(), field.getName(), selectValueName, field.getTypeClass().getName());
+                    statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
+                } else if (field.isList()) {
+                    String statement = String.format(SET_LIST_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
+                    statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
+                } else if (field.isSet()) {
+                    String statement = String.format(SET_SET_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
+                    statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
+                } else if (field.isJavaBean()) {
+                    String setDifferentBeanStatement = String.format(SET_DIFFERENT_BEAN_TEMPLATE, localVariable.getName(), field.getName(), selectValueName);
+                    statements.add(elementFactory.createStatementFromText(setDifferentBeanStatement, psiFile.getContext()));
+                } else {
+                    statements.add(elementFactory.createStatementFromText(String.format(COPY_TEMPLATE, localVariable.getName(), field.getName(), selectValueName), psiFile.getContext()));
+                }
             }
         }
 

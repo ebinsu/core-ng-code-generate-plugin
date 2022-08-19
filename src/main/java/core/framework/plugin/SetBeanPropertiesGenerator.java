@@ -69,7 +69,12 @@ public class SetBeanPropertiesGenerator extends AnAction {
         List<LocalVariableFiledBean> localVariableFiledBeans = new ArrayList<>();
         for (PsiField field : localVariableTypeFields) {
             PsiType type = field.getType();
-            PsiClass typeClass = javaPsiFacade.findClass(type.getCanonicalText(), GlobalSearchScope.allScope(project));
+            String canonicalText = type.getCanonicalText();
+            int i = canonicalText.indexOf("<");
+            if (i != -1) {
+                canonicalText = canonicalText.substring(0, i);
+            }
+            PsiClass typeClass = javaPsiFacade.findClass(canonicalText, GlobalSearchScope.allScope(project));
             localVariableFiledBeans.add(new LocalVariableFiledBean(field, type, typeClass));
         }
 

@@ -38,11 +38,11 @@ public class LocalVariableFiledBean {
     }
 
     public boolean isList() {
-        return "java.util.List".equals(type.getCanonicalText());
+        return type.getCanonicalText().contains("java.util.List");
     }
 
     public boolean isSet() {
-        return "java.util.Set".equals(type.getCanonicalText());
+        return type.getCanonicalText().contains("java.util.Set");
     }
 
     public boolean isJavaBean() {
