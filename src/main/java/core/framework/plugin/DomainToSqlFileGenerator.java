@@ -33,6 +33,7 @@ import java.util.List;
  * @author ebin
  */
 public class DomainToSqlFileGenerator extends AnAction {
+    public static final String LINE_START = "   ";
     public static final String EMPTY_BLOCK = "      ";
     public static final String SINGLE_EMPTY_BLOCK = " ";
     public static final String COLUMN_NAME_FLAG = "`";
@@ -95,7 +96,7 @@ public class DomainToSqlFileGenerator extends AnAction {
         }
 
         for (DomainDesc domainDesc : domainDescs) {
-            StringBuilder columnSql = new StringBuilder(EMPTY_BLOCK);
+            StringBuilder columnSql = new StringBuilder(LINE_START);
             columnSql.append(COLUMN_NAME_FLAG).append(domainDesc.columnName).append(COLUMN_NAME_FLAG);
             if (domainDesc.columnName.length() < maxColumnNameLength) {
                 int i = maxColumnNameLength - domainDesc.columnName.length();
