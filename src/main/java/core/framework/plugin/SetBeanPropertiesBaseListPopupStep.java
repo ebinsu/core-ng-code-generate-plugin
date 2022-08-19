@@ -32,7 +32,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<LocalV
     private final PsiLocalVariable localVariable;
     private final PsiElement methodBlock;
     private final PsiElement statement;
-    List<LocalVariableFiledBean> fields;
+    private final List<LocalVariableFiledBean> fields;
 
     public SetBeanPropertiesBaseListPopupStep(List<LocalVariableBean> listValues, Project project, PsiFile psiFile, PsiLocalVariable localVariable,
                                               PsiElement methodBlock, PsiElement statement, List<LocalVariableFiledBean> fields) {
@@ -42,7 +42,6 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<LocalV
         this.methodBlock = methodBlock;
         this.statement = statement;
         this.fields = fields;
-        Collections.reverse(listValues);
         init("Select Local Variable To Set Properties :", listValues, null);
     }
 
@@ -84,6 +83,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<LocalV
         }
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
+            Collections.reverse(statements);
             for (PsiStatement addStatement : statements) {
                 methodBlock.addAfter(addStatement, statement);
             }
