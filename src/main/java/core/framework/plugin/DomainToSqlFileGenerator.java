@@ -79,9 +79,6 @@ public class DomainToSqlFileGenerator extends AnAction {
                 continue;
             }
             String columnType = getColumnType(field, columnName, project, psiFacade);
-            if (columnType == null) {
-                continue;
-            }
             boolean notNull = isNotNull(field);
             String columnNullableDesc = notNull ? "NOT NULL" : "NULL";
             domainDescs.add(new DomainDesc(columnName, columnType, columnNullableDesc));
@@ -195,7 +192,7 @@ public class DomainToSqlFileGenerator extends AnAction {
     private String getColumnType(PsiField field, String columnName, Project project, JavaPsiFacade psiFacade) {
         PsiType type = field.getType();
         if (type instanceof PsiPrimitiveType) {
-            return null;
+            return "UNKNOWN";
         }
         String canonicalText = type.getCanonicalText();
         switch (canonicalText) {
@@ -229,6 +226,6 @@ public class DomainToSqlFileGenerator extends AnAction {
                 }
                 break;
         }
-        return null;
+        return "UNKNOWN";
     }
 }

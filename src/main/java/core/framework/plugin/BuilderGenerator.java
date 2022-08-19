@@ -25,7 +25,7 @@ public class BuilderGenerator extends AnAction {
     public static final String MAIN_CLASS_CONSTRUCTOR_BODY_TEMPLATE = "%1$s = builder.%1$s;";
     public static final String MAIN_CLASS_BUILDER_METHOD_TEMPLATE = "public static %1$s.Builder builder() { return new %1$s.Builder(); }";
     public static final String BUILDER_CLASS_FIELD_TEMPLATE = "private %1$s %2$s;";
-    public static final String BUILDER_CLASS_SET_METHOD_TEMPLATE = "public Builder %1$s(String %1$s) {this.%1$s=%1$s; return this;}";
+    public static final String BUILDER_CLASS_SET_METHOD_TEMPLATE = "public Builder %1$s(%2$s %1$s) {this.%1$s=%1$s; return this;}";
     public static final String BUILDER_CLASS_BUILD_METHOD_TEMPLATE = "public %1$s build() {return new %1$s(this);}";
     public static final String BUILDER_CLASS_NAME = "Builder";
 
@@ -75,7 +75,7 @@ public class BuilderGenerator extends AnAction {
         for (PsiField field : allFields) {
             String fieldName = field.getName();
             builderClass.add(elementFactory.createFieldFromText(String.format(BUILDER_CLASS_FIELD_TEMPLATE, field.getType().getPresentableText(), fieldName), context));
-            builderClass.add(elementFactory.createMethodFromText(String.format(BUILDER_CLASS_SET_METHOD_TEMPLATE, fieldName), context));
+            builderClass.add(elementFactory.createMethodFromText(String.format(BUILDER_CLASS_SET_METHOD_TEMPLATE, fieldName, field.getType().getPresentableText()), context));
             if (body != null)
                 body.add(elementFactory.createStatementFromText(String.format(MAIN_CLASS_CONSTRUCTOR_BODY_TEMPLATE, fieldName), context));
         }

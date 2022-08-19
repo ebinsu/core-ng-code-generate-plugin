@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>core.framework.core-ng-code-generate-plugin</id>
-    <name>CorengCodeGeneratePlugin</name>
+    <name>GenerateCodeForCoreNgStyle</name>
     <vendor email="ebinsu@chancetop.com" url="https://github.com/ebinsu?tab=repositories">Ebin</vendor>
 
     <description><![CDATA[
