@@ -57,16 +57,28 @@ public class SetBeanPropertiesGenerator extends AnAction {
             return;
         }
         PsiLocalVariable mainLocalVariable = (PsiLocalVariable) maybeLocalVariable;
-        PsiClass localVariableType = JavaPsiFacade.getInstance(project)
-                .findClass(mainLocalVariable.getTypeElement().getType().getCanonicalText(), GlobalSearchScope.allScope(project));
+        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
+        PsiClass localVariableType = javaPsiFacade.findClass(mainLocalVariable.getTypeElement().getType().getCanonicalText(), GlobalSearchScope.allScope(project));
         if (localVariableType == null) {
             return;
         }
+        PsiField[] localVariableTypeFields = localVariableType.getFields();
+        if (localVariableTypeFields.length == 0) {
+            return;
+        }
+        List<LocalVariableFiledBean> localVariableFiledBeans = new ArrayList<>();
+        for (PsiField field : localVariableTypeFields) {
+            PsiType type = field.getType();
+            PsiClass typeClass = javaPsiFacade.findClass(type.getCanonicalText(), GlobalSearchScope.allScope(project));
+            localVariableFiledBeans.add(new LocalVariableFiledBean(field, type, typeClass));
+        }
+
+
         PsiElement statement = mainLocalVariable.getParent();
         PsiElement methodBlock = statement.getParent();
         PsiElement method = methodBlock.getParent();
 
-        List<String> methodAllVariable = new ArrayList<>();
+        List<LocalVariableBean> methodAllVariable = new ArrayList<>();
         PsiElement[] children = method.getChildren();
         PsiParameterList methodParamList = null;
         for (PsiElement psiElement : children) {
@@ -80,7 +92,8 @@ public class SetBeanPropertiesGenerator extends AnAction {
             for (PsiParameter parameter : parameters) {
                 PsiType type = parameter.getType();
                 if (!(type instanceof PsiPrimitiveType) && !type.getCanonicalText().startsWith(JAVA_PACKAGE)) {
-                    methodAllVariable.add(parameter.getType().getPresentableText() + DISPLAY_NAME_SPLIT + parameter.getName());
+                    PsiClass typeClass = javaPsiFacade.findClass(type.getCanonicalText(), GlobalSearchScope.allScope(project));
+                    methodAllVariable.add(new LocalVariableBean(type, typeClass, parameter.getName()));
                 }
             }
         }
@@ -90,16 +103,18 @@ public class SetBeanPropertiesGenerator extends AnAction {
                               if (!localVariable.getName().equals(mainLocalVariable.getName())) {
                                   PsiType type = localVariable.getTypeElement().getType();
                                   if (!(type instanceof PsiPrimitiveType) && !type.getCanonicalText().startsWith(JAVA_PACKAGE)) {
-                                      methodAllVariable.add(localVariable.getTypeElement().getType().getPresentableText() + DISPLAY_NAME_SPLIT + localVariable.getName());
+                                      PsiClass typeClass = javaPsiFacade.findClass(type.getCanonicalText(), GlobalSearchScope.allScope(project));
+                                      methodAllVariable.add(new LocalVariableBean(type, typeClass, localVariable.getName()));
                                   }
                               }
                               super.visitLocalVariable(localVariable);
                           }
                       }
         );
-        PsiField[] fields = localVariableType.getFields();
+
+
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
-        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, psiFile, mainLocalVariable, methodBlock, statement, fields));
+        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, psiFile, mainLocalVariable, methodBlock, statement, localVariableFiledBeans));
         listPopup.showInBestPositionFor(e.getDataContext());
     }
 }

@@ -1,11 +1,10 @@
 <idea-plugin>
-    <id>org.example.core-ng-code-generate-plugin</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>core.framework.core-ng-code-generate-plugin</id>
+    <name>CorengCodeGeneratePlugin</name>
+    <vendor email="ebinsu@chancetop.com" url="https://github.com/ebinsu?tab=repositories">Ebin</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    Generate code for use core ng lib develop.<br>
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
