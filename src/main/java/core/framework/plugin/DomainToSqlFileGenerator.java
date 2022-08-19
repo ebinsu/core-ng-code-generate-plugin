@@ -112,7 +112,7 @@ public class DomainToSqlFileGenerator extends AnAction {
         }
 
         if (!pks.isEmpty()) {
-            sql.append(EMPTY_BLOCK).append("PRIMARY KEY (").append(String.join(", ", pks)).append(")\n");
+            sql.append(LINE_START).append("PRIMARY KEY (").append(String.join(", ", pks)).append(")\n");
         }
         sql.append(") ENGINE = InnoDB;\n");
         String filename = "R__" + tableName + ".sql";
