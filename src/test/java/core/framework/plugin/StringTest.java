@@ -8,13 +8,12 @@ import org.apache.commons.lang.StringUtils;
 public class StringTest {
     public static void main(String[] args) {
         String c = "agentEnum";
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "a"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "b"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "c"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "abc"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "agentEn"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "ag"));
-        System.out.println(StringUtils.getLevenshteinDistance("agentEnum", "agentEnum1"));
-        System.out.println(StringUtils.getLevenshteinDistance("orderId".toLowerCase(), "mp_order_id"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "a"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "b"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "c"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "abc"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "agentEn"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "ag"));
+        System.out.println(StringUtils.getLevenshteinDistance("agent", "agentEnum"));
     }
 }

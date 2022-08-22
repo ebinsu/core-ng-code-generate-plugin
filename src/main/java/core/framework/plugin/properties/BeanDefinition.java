@@ -3,7 +3,7 @@ package core.framework.plugin.properties;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
-import core.framework.plugin.ClassUtils;
+import core.framework.plugin.utils.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class BeanDefinition {
             String canonicalText = type.getCanonicalText();
 
             PsiType[] superTypes = type.getSuperTypes();
-            Optional<String> enumType = Arrays.stream(superTypes).filter(f -> f.getCanonicalText().contains(ClassUtils.ENUM_CLASS)).findFirst().map(PsiType::getCanonicalText);
+            Optional<String> enumType = Arrays.stream(superTypes).filter(f -> f.getCanonicalText().contains(ClassUtils.ENUM)).findFirst().map(PsiType::getCanonicalText);
             if (enumType.isPresent()) {
                 fields.put(field.getName(), enumType.get());
             } else {
@@ -56,13 +56,12 @@ public class BeanDefinition {
     }
 
     public Optional<String> getSimilarityField(String filedName, String fileType) {
-        String lowerCase = filedName.toLowerCase();
         int i = fileType.indexOf("<");
         String genFileType = fileType;
         if (i != -1) {
             genFileType = genFileType.substring(0, i);
         }
-        Map<Integer, List<String>> collect = fields.keySet().stream().collect(Collectors.groupingBy((k -> StringUtils.getLevenshteinDistance(lowerCase, k.toLowerCase()))));
+        Map<Integer, List<String>> collect = fields.keySet().stream().collect(Collectors.groupingBy((k -> StringUtils.getLevenshteinDistance(filedName, k))));
         OptionalInt min = collect.keySet().stream().mapToInt(k -> k).min();
         if (min.isPresent()) {
             List<String> candidate = collect.get(min.getAsInt());

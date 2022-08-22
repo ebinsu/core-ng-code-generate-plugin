@@ -26,7 +26,7 @@
                 text="Set Properties" description="Set bean properties">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
         </action>
-        <action id="DomainToSqlFileGenerator" class="core.framework.plugin.DomainToSqlFileGenerator" text="New Sql File For Domain"
+        <action id="DomainToSqlFileGenerator" class="core.framework.plugin.sql.DomainToSqlFileGenerator" text="New Sql File For Domain"
                 description="Domain to sql file" icon="AllIcons.FileTypes.Text">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>

@@ -20,7 +20,7 @@ import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
-import core.framework.plugin.PsiUtils;
+import core.framework.plugin.utils.PsiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
