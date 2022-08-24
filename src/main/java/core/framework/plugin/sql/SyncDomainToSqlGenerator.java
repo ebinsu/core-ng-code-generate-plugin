@@ -18,6 +18,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
@@ -72,26 +73,41 @@ public class SyncDomainToSqlGenerator extends AnAction {
         }
 
         String fullSql = sqlDoc.getText();
-        SQLStatementParser currentSQLParser = new MySqlStatementParser(fullSql);
-        SQLStatement currentSQLStatement = currentSQLParser.parseStatement();
-        MySqlCreateTableStatement currentStatement;
-        if (currentSQLStatement instanceof MySqlCreateTableStatement) {
-            currentStatement = (MySqlCreateTableStatement) currentSQLStatement;
-        } else {
+        MySqlCreateTableStatement currentStatement = null;
+        try {
+            SQLStatementParser currentSQLParser = new MySqlStatementParser(fullSql);
+            SQLStatement currentSQLStatement = currentSQLParser.parseStatement();
+            if (currentSQLStatement instanceof MySqlCreateTableStatement) {
+                currentStatement = (MySqlCreateTableStatement) currentSQLStatement;
+            } else {
+                return;
+            }
+        } catch (Exception ex) {
+            Messages.showMessageDialog("Parse " + virtualFile.getName() + " sql error.", "Error", Messages.getErrorIcon());
+        }
+        if (currentStatement == null) {
             return;
         }
 
         if (!getRealName(currentStatement.getTableName()).equals(beanDefinition.tableName)) {
+            Messages.showMessageDialog("Table names to be synchronized are not equal.", "Error", Messages.getErrorIcon());
             return;
         }
 
         String newSQL = beanDefinition.toSql();
-        SQLStatementParser newSQLParser = new MySqlStatementParser(newSQL);
-        SQLStatement newSQLStatement = newSQLParser.parseStatement();
-        MySqlCreateTableStatement newStatement;
-        if (newSQLStatement instanceof MySqlCreateTableStatement) {
-            newStatement = (MySqlCreateTableStatement) newSQLStatement;
-        } else {
+        MySqlCreateTableStatement newStatement = null;
+        try {
+            SQLStatementParser newSQLParser = new MySqlStatementParser(newSQL);
+            SQLStatement newSQLStatement = newSQLParser.parseStatement();
+            if (newSQLStatement instanceof MySqlCreateTableStatement) {
+                newStatement = (MySqlCreateTableStatement) newSQLStatement;
+            } else {
+                return;
+            }
+        } catch (Exception ex) {
+            Messages.showMessageDialog("Parse sql for domain " + mainClass.getName() + " error.", "Error", Messages.getErrorIcon());
+        }
+        if (newStatement == null) {
             return;
         }
 
@@ -128,6 +144,8 @@ public class SyncDomainToSqlGenerator extends AnAction {
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), removeDefinition.toAlertSql(beanDefinition.tableName));
             });
+
+            Messages.showMessageDialog("Sync finished.", "Success", Messages.getInformationIcon());
         });
     }
 
