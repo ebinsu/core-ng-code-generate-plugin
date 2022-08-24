@@ -11,6 +11,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiAnnotation;
@@ -133,6 +134,11 @@ public class CopyEnumGenerator extends AnAction {
         VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
+            VirtualFile enumFile = javaDirectory.getVirtualFile().findChild(fileFromText.getName());
+            if (enumFile == null) {
+                Messages.showMessageDialog(generateEnumName + " existed.", "File Existed", Messages.getInformationIcon());
+                return;
+            }
             javaDirectory.add(fileFromText);
             String testDir = findTestDir(javaDirectory);
             String testBaseDir = findTestBaseDir(javaDirectory);
