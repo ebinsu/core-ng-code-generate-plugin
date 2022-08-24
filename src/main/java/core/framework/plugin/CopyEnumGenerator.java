@@ -135,7 +135,7 @@ public class CopyEnumGenerator extends AnAction {
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
             VirtualFile enumFile = javaDirectory.getVirtualFile().findChild(fileFromText.getName());
-            if (enumFile == null) {
+            if (enumFile != null) {
                 Messages.showMessageDialog(generateEnumName + " existed.", "File Existed", Messages.getInformationIcon());
                 return;
             }
