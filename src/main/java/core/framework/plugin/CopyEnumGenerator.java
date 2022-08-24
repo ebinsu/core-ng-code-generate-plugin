@@ -130,15 +130,17 @@ public class CopyEnumGenerator extends AnAction {
         PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText(JavaLanguage.INSTANCE, sb.toString());
         fileFromText.setName(generateEnumName + ".java");
 
+        VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
+
         WriteCommandAction.runWriteCommandAction(project, () -> {
             javaDirectory.add(fileFromText);
             String testDir = findTestDir(javaDirectory);
             String testBaseDir = findTestBaseDir(javaDirectory);
             VirtualFile testDirVF = null;
             if (testDir != null && testBaseDir != null) {
-                testDirVF = VirtualFileManager.getInstance().findFileByUrl(testDir + testBaseDir);
+                testDirVF = virtualFileManager.findFileByUrl(testDir + testBaseDir);
                 if (testDirVF == null) {
-                    VirtualFile testDirFile = VirtualFileManager.getInstance().findFileByUrl(testDir);
+                    VirtualFile testDirFile = virtualFileManager.findFileByUrl(testDir);
                     if (testDirFile != null) {
                         try {
                             testDirVF = testDirFile.createChildDirectory(new Object(), testBaseDir);
@@ -156,7 +158,7 @@ public class CopyEnumGenerator extends AnAction {
                     PsiFile testClassFile = PsiFileFactory.getInstance(project).createFileFromText(JavaLanguage.INSTANCE,
                             String.format(TEST_CLASS_TEMPLATE, methodName, fullGenerateEnumName, fullSelectEnumName));
                     testClassFile.setName("EnumTest.java");
-                    PsiDirectory directory = PsiDirectoryFactory.getInstance(project).createDirectory(testDirVF);
+                    PsiDirectory directory = psiDirectoryFactory.createDirectory(testDirVF);
                     directory.add(testClassFile);
                 } else {
                     PsiFile file = PsiManager.getInstance(project).findFile(enumTestVF);
