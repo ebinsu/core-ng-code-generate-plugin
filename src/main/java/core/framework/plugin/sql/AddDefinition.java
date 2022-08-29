@@ -28,14 +28,20 @@ public class AddDefinition {
     public String afterColumnName;
     public String beforeFirstColumnName;
 
-    public AddDefinition(String columnName, String dateType, String constraint, String afterColumnName, String currentFirstColumn) {
+    public AddDefinition(String columnName, String dateType, boolean notnull, String afterColumnName, String currentFirstColumn) {
         this.columnName = columnName;
-        if (MysqlDialect.VARCHAR.equals(dateType)) {
-            this.dateType = MysqlDialect.INSTANCE.getType(ClassUtils.STRING, columnName);
+        this.dateType = dateType;
+        if (notnull) {
+            if (dateType.contains(MysqlDialect.TIMESTAMP)) {
+                this.constraint = "NOT NULL DEFAULT CURRENT_TIMESTAMP(6)";
+            } else if (dateType.contains(MysqlDialect.BIT)) {
+                this.constraint = "NOT NULL DEFAULT 0";
+            } else {
+                this.constraint = "NOT NULL DEFAULT TODO";
+            }
         } else {
-            this.dateType = dateType;
+            this.constraint = "NULL";
         }
-        this.constraint = constraint;
         if (afterColumnName == null) {
             this.beforeFirstColumnName = currentFirstColumn;
         } else {

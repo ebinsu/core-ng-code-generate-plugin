@@ -11,6 +11,8 @@ import java.util.Map;
 public class MysqlDialect {
     public static final MysqlDialect INSTANCE = new MysqlDialect();
     public static final String VARCHAR = "VARCHAR";
+    public static final String TIMESTAMP = "TIMESTAMP";
+    public static final String BIT = "BIT";
 
     Map<String, String> types = new HashMap<>();
 

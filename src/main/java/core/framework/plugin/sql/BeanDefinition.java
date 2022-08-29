@@ -28,8 +28,8 @@ public class BeanDefinition {
     public static final String SINGLE_EMPTY_BLOCK = " ";
     public static final String COLUMN_NAME_FLAG = "`";
     public String tableName;
-    public Map<String, String> columns = new LinkedHashMap<>();
     // column name and type
+    public Map<String, String> columns = new LinkedHashMap<>();
     public Set<String> primaryKeys = new LinkedSet<>();
     public Set<String> notNullFields = new HashSet<>();
 

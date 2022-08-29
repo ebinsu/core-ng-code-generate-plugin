@@ -32,7 +32,7 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
         <action id="SyncDomainToSqlGenerator" class="core.framework.plugin.sql.SyncDomainToSqlGenerator"
-                text="Sync Sql File For Domain (Add Or Drop Column)" description="Sync domain to sql file" icon="AllIcons.Actions.Refresh">
+                    text="Sync with Domain (Add Or Drop Column)" description="Sync domain to sql file" icon="AllIcons.Actions.Refresh">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="SynchronizeCurrentFile"/>
         </action>
         <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"

@@ -2,8 +2,6 @@ package core.framework.plugin.sql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
-import com.alibaba.druid.sql.ast.statement.SQLNotNullConstraint;
-import com.alibaba.druid.sql.ast.statement.SQLNullConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLTableElement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
@@ -28,6 +26,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
@@ -94,24 +93,7 @@ public class SyncDomainToSqlGenerator extends AnAction {
             return;
         }
 
-        String newSQL = beanDefinition.toSql();
-        MySqlCreateTableStatement newStatement = null;
-        try {
-            SQLStatementParser newSQLParser = new MySqlStatementParser(newSQL);
-            SQLStatement newSQLStatement = newSQLParser.parseStatement();
-            if (newSQLStatement instanceof MySqlCreateTableStatement) {
-                newStatement = (MySqlCreateTableStatement) newSQLStatement;
-            } else {
-                return;
-            }
-        } catch (Exception ex) {
-            Messages.showMessageDialog("Parse sql for domain " + mainClass.getName() + " error.", "Error", Messages.getErrorIcon());
-        }
-        if (newStatement == null) {
-            return;
-        }
-
-        TableSyncDefinition tableSyncDefinition = compare(currentStatement, newStatement);
+        TableSyncDefinition tableSyncDefinition = compare(currentStatement, beanDefinition);
         WriteCommandAction.runWriteCommandAction(project, () -> {
             tableSyncDefinition.addDefinitions.forEach(addDefinition -> {
                 int line = -1;
@@ -160,70 +142,30 @@ public class SyncDomainToSqlGenerator extends AnAction {
         return -1;
     }
 
-    private TableSyncDefinition compare(MySqlCreateTableStatement currentStatement, MySqlCreateTableStatement newStatement) {
+    private TableSyncDefinition compare(MySqlCreateTableStatement currentStatement, BeanDefinition newStatement) {
         TableSyncDefinition tableSyncDefinition = new TableSyncDefinition();
         List<SQLTableElement> currentTableElements = currentStatement.getTableElementList();
-        List<SQLTableElement> newTableElements = newStatement.getTableElementList();
+        Set<String> newColumns = newStatement.columns.keySet();
 
-        compareColumn(tableSyncDefinition, currentTableElements, newTableElements);
-        return tableSyncDefinition;
-    }
-
-    /*private void comparePrimaryKey(TableSyncDefinition tableSyncDefinition, List<SQLTableElement> currentTableElements, List<SQLTableElement> newTableElements) {
-        Set<String> currentPKs = currentTableElements.stream().filter(f -> f instanceof MySqlPrimaryKey).map(m -> ((MySqlPrimaryKey) m).getName().getSimpleName()).collect(Collectors.toSet());
-        Set<String> newPKs = newTableElements.stream().filter(f -> f instanceof MySqlPrimaryKey).map(m -> ((MySqlPrimaryKey) m).getName().getSimpleName()).collect(Collectors.toSet());
-        if (!(newPKs.size() == currentPKs.size() && newPKs.containsAll(currentPKs))) {
-            tableSyncDefinition.newPKs.addAll(newPKs);
-        }
-    }*/
-
-    private void compareColumn(TableSyncDefinition tableSyncDefinition, List<SQLTableElement> currentTableElements, List<SQLTableElement> newTableElements) {
         List<SQLColumnDefinition> currentColumns = currentTableElements.stream().filter(f -> f instanceof SQLColumnDefinition).map(m -> (SQLColumnDefinition) m).collect(Collectors.toList());
-        List<SQLColumnDefinition> newColumns = newTableElements.stream().filter(f -> f instanceof SQLColumnDefinition).map(m -> (SQLColumnDefinition) m).collect(Collectors.toList());
         String preColumnName = null;
         String currentFirstColumn = currentColumns.stream().findFirst().map(m -> m.getName().getSimpleName()).orElse(null);
-        for (SQLColumnDefinition newColumn : newColumns) {
-            String newColumnName = newColumn.getName().getSimpleName();
-            Optional<SQLColumnDefinition> optional = currentColumns.stream().filter(f -> f.getName().getSimpleName().equals(newColumnName)).findFirst();
+        for (String newColumn : newColumns) {
+            Optional<SQLColumnDefinition> optional = currentColumns.stream().filter(f -> getRealName(f.getName().getSimpleName()).equals(newColumn)).findFirst();
             if (optional.isEmpty()) {
                 //add
-                String constraint = newColumn.getConstraints().stream()
-                        .filter(f -> f instanceof SQLNullConstraint || f instanceof SQLNotNullConstraint).findFirst()
-                        .map(m -> m instanceof SQLNotNullConstraint ? "NOT NULL" : "NULL").orElse("NULL");
-                tableSyncDefinition.addDefinitions.add(new AddDefinition(newColumnName, newColumn.getDataType().getName(), constraint, preColumnName, currentFirstColumn));
-            } else {
-                /*
-                UpdateDefinition updateDefinition = new UpdateDefinition(newColumnName, preColumnName);
-                SQLColumnDefinition currentColumn = optional.get();
-                if (!newColumn.getDataType().equals(currentColumn.getDataType())) {
-                    // type changed
-                    updateDefinition.currentDateType = currentColumn.getDataType().toString();
-                    updateDefinition.newDateType = newColumn.getDataType().toString();
-                }
-                Optional<SQLColumnConstraint> newConstraintOptional = newColumn.getConstraints().stream().filter(f -> f instanceof SQLNullConstraint || f instanceof SQLNotNullConstraint).findFirst();
-                Optional<SQLColumnConstraint> currentConstraintOptional = currentColumn.getConstraints().stream().filter(f -> f instanceof SQLNullConstraint || f instanceof SQLNotNullConstraint).findFirst();
-                if (newConstraintOptional.isPresent() && currentConstraintOptional.isPresent()) {
-                    SQLColumnConstraint newConstraint = newConstraintOptional.get();
-                    SQLColumnConstraint currentConstraint = currentConstraintOptional.get();
-                    if (!newConstraint.getClass().equals(currentConstraint.getClass())) {
-                        // constraint changed
-                        updateDefinition.currentConstraint = currentConstraint instanceof SQLNotNullConstraint ? "NOT NULL" : "NULL";
-                        updateDefinition.newConstraint = newConstraint instanceof SQLNotNullConstraint ? "NOT NULL" : "NULL";
-                    }
-                }
-                if (updateDefinition.needUpdate()) {
-                    tableSyncDefinition.updateDefinitions.add(updateDefinition);
-                }*/
+                tableSyncDefinition.addDefinitions.add(new AddDefinition(newColumn, newStatement.columns.get(newColumn), newStatement.notNullFields.contains(newColumn), preColumnName, currentFirstColumn));
             }
-            preColumnName = newColumnName;
+            preColumnName = newColumn;
         }
 
         for (SQLColumnDefinition currentColumn : currentColumns) {
-            String currentColumnName = currentColumn.getName().getSimpleName();
-            if (newColumns.stream().noneMatch(f -> f.getName().getSimpleName().equals(currentColumnName))) {
+            String currentColumnName = getRealName(currentColumn.getName().getSimpleName());
+            if (newColumns.stream().noneMatch(f -> f.equals(currentColumnName))) {
                 tableSyncDefinition.removeDefinitions.add(new RemoveDefinition(currentColumnName));
             }
         }
+        return tableSyncDefinition;
     }
 
     private boolean isSqlFile(String fileName) {
