@@ -46,7 +46,7 @@ public class AddDefinition {
     public String toAlertSql(String tableName) {
         String cname = columnName.replace(COLUMN_NAME_FLAG, "");
         return String.format(template, cname, tableName, dateType, constraint,
-                Optional.ofNullable(afterColumnName).map(name -> "AFTER" + name).orElse(""));
+                Optional.ofNullable(afterColumnName).map(name -> "AFTER " + name).orElse(""));
     }
 
     public String toColumnSql() {
