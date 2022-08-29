@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,9 +25,9 @@ public class BeanDefinition {
     public String variableName;
     public String displayName;
     // filed name and type
-    public Map<String, String> fields = new HashMap<>();
+    public Map<String, String> fields = new LinkedHashMap<>();
     // filed name and simple type
-    public Map<String, String> fieldSimpleNames = new HashMap<>();
+    public Map<String, String> fieldSimpleNames = new LinkedHashMap<>();
 
     public BeanDefinition() {
     }

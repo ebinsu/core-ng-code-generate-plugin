@@ -4,10 +4,13 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiStatement;
+import com.intellij.psi.search.GlobalSearchScope;
 import core.framework.plugin.utils.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +25,7 @@ import java.util.Optional;
  */
 public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDefinition> {
     public static final String NON_PROPERTIES_TEMPLATE = "%1$s.%2$s=null;";
+    public static final String NON_PROPERTIES_JAVA_BEAN_TEMPLATE = "%1$s.%2$s=new %3$s();";
     public static final String COPY_TEMPLATE = "%1$s.%2$s=%3$s.%4$s;";
     public static final String SET_ENUM_TEMPLATE = "%1$s.%2$s=%3$s.valueOf(%4$s.%5$s.name());";
     public static final String SET_LIST_TEMPLATE = "%1$s.%2$s=%3$s.%4$s.stream().map(this::%2$s).collect(Collectors.toList());";
@@ -33,10 +37,12 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
     private final PsiElement methodBlock;
     private final PsiElement statement;
     private final BeanDefinition target;
+    private final JavaPsiFacade javaPsiFacade;
 
-    public SetBeanPropertiesBaseListPopupStep(List<BeanDefinition> listValues, Project project, PsiFile psiFile,
+    public SetBeanPropertiesBaseListPopupStep(List<BeanDefinition> listValues, Project project, JavaPsiFacade javaPsiFacade, PsiFile psiFile,
                                               PsiElement methodBlock, PsiElement statement, BeanDefinition target) {
         this.project = project;
+        this.javaPsiFacade = javaPsiFacade;
         this.psiFile = psiFile;
         this.methodBlock = methodBlock;
         this.statement = statement;
@@ -61,11 +67,20 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
     }
 
     private void generateSetNull() {
-        List<PsiStatement> statements = new ArrayList<>();
         PsiElementFactory elementFactory = PsiElementFactory.getInstance(project);
+        List<PsiStatement> statements = new ArrayList<>();
         target.fields.forEach((fieldName, type) -> {
-            String statement = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
-            statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
+            if (ClassUtils.isJavaBean(type)) {
+                String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, target.variableName, fieldName, target.getSimpleFieldType(fieldName).get());
+                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+                target.getFieldType(fieldName).ifPresent(beanClassStr -> {
+                    String name = target.variableName + "." + fieldName;
+                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, methodBlock, statements);
+                });
+            } else {
+                String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
+                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+            }
         });
         WriteCommandAction.runWriteCommandAction(project, () -> {
             Collections.reverse(statements);
@@ -116,6 +131,27 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
             Collections.reverse(statements);
             for (PsiStatement addStatement : statements) {
                 methodBlock.addAfter(addStatement, statement);
+            }
+        });
+    }
+
+    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory, String beanClassStr, String variableName, PsiElement methodBlock, List<PsiStatement> statements) {
+        PsiClass beanClass = javaPsiFacade.findClass(beanClassStr, GlobalSearchScope.allScope(project));
+        if (beanClass == null) {
+            return;
+        }
+        BeanDefinition beanDefinition = new BeanDefinition(beanClass, variableName);
+        beanDefinition.fields.forEach((fieldName, type) -> {
+            if (ClassUtils.isJavaBean(type)) {
+                String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, variableName, fieldName, beanDefinition.getSimpleFieldType(fieldName).get());
+                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+                beanDefinition.getFieldType(fieldName).ifPresent(_beanClassStr -> {
+                    String name = variableName + "." + fieldName;
+                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, methodBlock, statements);
+                });
+            } else {
+                String statementStr = String.format(NON_PROPERTIES_TEMPLATE, variableName, fieldName);
+                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
             }
         });
     }

@@ -81,7 +81,7 @@ public class SetBeanPropertiesGenerator extends AnAction {
         findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable);
 
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
-        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, psiFile, methodBlock, statement, focusBeanDefinition));
+        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, methodBlock, statement, focusBeanDefinition));
         listPopup.showInBestPositionFor(e.getDataContext());
     }
 

@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class MysqlDialect {
     public static final MysqlDialect INSTANCE = new MysqlDialect();
-    private static final String VARCHAR = "VARCHAR";
+    public static final String VARCHAR = "VARCHAR";
 
     Map<String, String> types = new HashMap<>();
 

@@ -1,5 +1,7 @@
 package core.framework.plugin.sql;
 
+import core.framework.plugin.utils.ClassUtils;
+
 import java.util.Optional;
 
 import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
@@ -28,7 +30,11 @@ public class AddDefinition {
 
     public AddDefinition(String columnName, String dateType, String constraint, String afterColumnName, String currentFirstColumn) {
         this.columnName = columnName;
-        this.dateType = dateType;
+        if (MysqlDialect.VARCHAR.equals(dateType)) {
+            this.dateType = MysqlDialect.INSTANCE.getType(ClassUtils.STRING, columnName);
+        } else {
+            this.dateType = dateType;
+        }
         this.constraint = constraint;
         if (afterColumnName == null) {
             this.beforeFirstColumnName = currentFirstColumn;
