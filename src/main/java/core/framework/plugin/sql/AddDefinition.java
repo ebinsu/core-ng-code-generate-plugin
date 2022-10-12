@@ -1,7 +1,5 @@
 package core.framework.plugin.sql;
 
-import core.framework.plugin.utils.ClassUtils;
-
 import java.util.Optional;
 
 import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
@@ -56,6 +54,10 @@ public class AddDefinition {
     }
 
     public String toColumnSql() {
-        return LINE_START + columnName + EMPTY_BLOCK + dateType + EMPTY_BLOCK + constraint + ",";
+        String cname = columnName;
+        if (!columnName.contains(COLUMN_NAME_FLAG)) {
+            cname = COLUMN_NAME_FLAG + columnName + COLUMN_NAME_FLAG;
+        }
+        return LINE_START + cname + EMPTY_BLOCK + dateType + EMPTY_BLOCK + constraint + ",";
     }
 }
