@@ -24,6 +24,8 @@ public final class ClassUtils {
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getCanonicalName();
     public static final String LOCAL_DATE = LocalDate.class.getCanonicalName();
 
+    public static final String APP_CLASS = "app.";
+
     private ClassUtils() {
     }
 
@@ -40,6 +42,6 @@ public final class ClassUtils {
     }
 
     public static boolean isJavaBean(String type) {
-        return !type.startsWith(JAVA_PACKAGE);
+        return type.startsWith(APP_CLASS);
     }
 }

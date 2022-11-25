@@ -7,7 +7,6 @@ import org.apache.commons.lang.StringUtils;
  */
 public class StringTest {
     public static void main(String[] args) {
-        String c = "agentEnum";
         System.out.println(StringUtils.getLevenshteinDistance("agent", "a"));
         System.out.println(StringUtils.getLevenshteinDistance("agent", "b"));
         System.out.println(StringUtils.getLevenshteinDistance("agent", "c"));
@@ -15,5 +14,10 @@ public class StringTest {
         System.out.println(StringUtils.getLevenshteinDistance("agent", "agentEn"));
         System.out.println(StringUtils.getLevenshteinDistance("agent", "ag"));
         System.out.println(StringUtils.getLevenshteinDistance("agent", "agentEnum"));
+
+        System.out.println(StringUtils.getLevenshteinDistance("orderId", "wonderOrderId"));
+        System.out.println(StringUtils.getLevenshteinDistance("orderId", "mpOrderId"));
+        System.out.println(StringUtils.getLevenshteinDistance("orderId", "OrderId"));
+        System.out.println(StringUtils.getLevenshteinDistance("orderAddress", "orderHDRAddress"));
     }
 }

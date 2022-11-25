@@ -18,10 +18,10 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="builder" class="core.framework.plugin.BuilderGenerator" text="Builder"
+        <!-- <action id="builder" class="core.framework.plugin.BuilderGenerator" text="Builder"
                 description="Generate builder method">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-        </action>
+        </action> -->
         <action id="SetBeanPropertiesGenerator" class="core.framework.plugin.properties.SetBeanPropertiesGenerator"
                 text="Set Properties" description="Set bean properties">
             <add-to-group group-id="GenerateGroup" anchor="first"/>

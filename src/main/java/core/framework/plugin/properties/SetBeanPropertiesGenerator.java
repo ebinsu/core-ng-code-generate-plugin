@@ -1,6 +1,7 @@
 package core.framework.plugin.properties;
 
 import com.intellij.ide.highlighter.JavaFileType;
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -51,10 +52,9 @@ public class SetBeanPropertiesGenerator extends AnAction {
             return;
         }
         PsiElement maybeLocalVariable = element.getParent();
-        if (!(maybeLocalVariable instanceof PsiLocalVariable)) {
+        if (!(maybeLocalVariable instanceof PsiLocalVariable focusLocalVariable)) {
             return;
         }
-        PsiLocalVariable focusLocalVariable = (PsiLocalVariable) maybeLocalVariable;
         PsiType focusLocalVariableType = focusLocalVariable.getType();
         if (!PsiUtils.isJavaBean(focusLocalVariableType)) {
             return;
@@ -73,16 +73,32 @@ public class SetBeanPropertiesGenerator extends AnAction {
         }
 
         PsiElement statement = focusLocalVariable.getParent();
-        PsiElement methodBlock = statement.getParent();
-        PsiElement method = methodBlock.getParent();
-
+        PsiElement method = findMethod(statement);
+        if (method == null) {
+            return;
+        }
         List<BeanDefinition> methodAllVariable = new ArrayList<>();
         findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
         findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable);
 
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
-        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, methodBlock, statement, focusBeanDefinition));
+        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, method, statement, focusBeanDefinition));
         listPopup.showInBestPositionFor(e.getDataContext());
+    }
+
+    private PsiElement findMethod(PsiElement statement) {
+        PsiElement maybeMethod = statement;
+        boolean isMethod;
+        do {
+            maybeMethod = maybeMethod.getParent();
+            if (maybeMethod instanceof ASTNode) {
+                System.out.println(((ASTNode) maybeMethod).getElementType().getDebugName());
+                isMethod = "METHOD".equals(((ASTNode) maybeMethod).getElementType().getDebugName());
+            } else {
+                isMethod = true;
+            }
+        } while (!isMethod);
+        return maybeMethod;
     }
 
     private void findMethodBodyVariable(Project project, JavaPsiFacade javaPsiFacade, PsiElement method, PsiLocalVariable focusLocalVariable, List<BeanDefinition> methodAllVariable) {

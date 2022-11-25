@@ -64,7 +64,7 @@ public class BeanDefinition {
         }
         Map<Integer, List<String>> collect = fields.keySet().stream().collect(Collectors.groupingBy((k -> StringUtils.getLevenshteinDistance(filedName, k))));
         OptionalInt min = collect.keySet().stream().mapToInt(k -> k).min();
-        if (min.isPresent()) {
+        if (min.isPresent() && min.getAsInt() <= 3) {
             List<String> candidate = collect.get(min.getAsInt());
             Optional<String> first = candidate.stream().filter(f -> fileType.contains(fields.get(f))).findFirst();
             if (first.isEmpty()) {
