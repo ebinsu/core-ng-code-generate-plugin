@@ -25,7 +25,6 @@ import core.framework.plugin.utils.PsiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author ebin
@@ -102,13 +101,9 @@ public class SetBeanPropertiesGenerator extends AnAction {
     }
 
     private void findMethodBodyVariable(Project project, JavaPsiFacade javaPsiFacade, PsiElement method, PsiLocalVariable focusLocalVariable, List<BeanDefinition> methodAllVariable) {
-        AtomicBoolean add = new AtomicBoolean(true);
         method.accept(new JavaRecursiveElementVisitor() {
                           @Override
                           public void visitLocalVariable(PsiLocalVariable localVariable) {
-                              if (!add.get()) {
-                                  return;
-                              }
                               if (!localVariable.getName().equals(focusLocalVariable.getName())) {
                                   PsiType type = localVariable.getTypeElement().getType();
                                   if (PsiUtils.isJavaBean(type)) {
@@ -117,8 +112,6 @@ public class SetBeanPropertiesGenerator extends AnAction {
                                           methodAllVariable.add(new BeanDefinition(typeClass, localVariable.getName()));
                                       }
                                   }
-                              } else {
-                                  add.getAndSet(false);
                               }
                               super.visitLocalVariable(localVariable);
                           }
