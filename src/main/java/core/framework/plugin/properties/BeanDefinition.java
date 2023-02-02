@@ -2,6 +2,7 @@ package core.framework.plugin.properties;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiType;
 import core.framework.plugin.utils.ClassUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +38,12 @@ public class BeanDefinition {
         this.variableName = variableName;
         this.displayName = this.className + DISPLAY_NAME_SPLIT + variableName;
         PsiField[] classFields = typeClass.getFields();
-        for (PsiField field : classFields) {
+        List<PsiField> publicFields = Arrays.stream(classFields).filter(field ->
+                !field.getModifierList().hasModifierProperty(PsiModifier.PRIVATE)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.STATIC)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.FINAL)
+        ).toList();
+        for (PsiField field : publicFields) {
             PsiType type = field.getType();
             String canonicalText = type.getCanonicalText();
 

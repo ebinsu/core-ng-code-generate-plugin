@@ -1,34 +1,42 @@
 package core.framework.plugin.sql;
 
+import java.util.Optional;
+
+import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
+import static core.framework.plugin.sql.BeanDefinition.EMPTY_BLOCK;
+import static core.framework.plugin.sql.BeanDefinition.LINE_START;
+
 /**
  * @author ebin
  */
 public class UpdateDefinition {
     public static final String template = "SELECT COUNT(*) INTO @index FROM information_schema.`COLUMNS`\n" +
-            "WHERE table_schema=DATABASE() AND table_name='order_items' AND column_name='menu_item_name';\n" +
-            "SET @SQL=IF(@index>0,'ALTER TABLE order_items MODIFY COLUMN menu_item_name VARCHAR(65)  NOT NULL','select \\'Exist Column\\';');\n" +
+            "WHERE table_schema=DATABASE() AND table_name='%1$s' AND column_name='%2$s';\n" +
+            "SET @SQL=IF(@index>0,'ALTER TABLE %1$s MODIFY COLUMN %2$s %3$s %4$s','select \\'Exist Column\\';');\n" +
             "PREPARE statement FROM @SQL;\n" +
             "EXECUTE statement;";
 
     public String columnName;
-    public String currentDateType;
-    public String newDateType;
 
-    public String currentConstraint;
+    public String dateType;
     public String newConstraint;
 
-    public String afterColumnName;
-
-    public UpdateDefinition(String columnName, String afterColumnName) {
+    public UpdateDefinition(String columnName, String dateType, String newConstraint) {
         this.columnName = columnName;
-        this.afterColumnName = afterColumnName;
+        this.dateType = dateType;
+        this.newConstraint = newConstraint;
     }
 
-    public boolean needUpdate() {
-        return currentDateType != null || newDateType != null || currentConstraint != null || newConstraint != null;
+    public String toAlertSql(String tableName) {
+        String cname = columnName.replace(COLUMN_NAME_FLAG, "");
+        return String.format(template, tableName, cname, dateType, newConstraint);
     }
 
-    public String toSql(String tableName) {
-        return null;
+    public String toColumnSql() {
+        String cname = columnName;
+        if (!columnName.contains(COLUMN_NAME_FLAG)) {
+            cname = COLUMN_NAME_FLAG + columnName + COLUMN_NAME_FLAG;
+        }
+        return LINE_START + cname + EMPTY_BLOCK + dateType + EMPTY_BLOCK + newConstraint + ",";
     }
 }

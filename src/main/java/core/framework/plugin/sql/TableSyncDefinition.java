@@ -8,5 +8,6 @@ import java.util.List;
  */
 public class TableSyncDefinition {
     public List<AddDefinition> addDefinitions = new ArrayList<>();
+    public List<UpdateDefinition> updateDefinitions = new ArrayList<>();
     public List<RemoveDefinition> removeDefinitions = new ArrayList<>();
 }

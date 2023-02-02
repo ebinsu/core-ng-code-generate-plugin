@@ -1,7 +1,10 @@
 package core.framework.plugin.sql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLColumnConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
+import com.alibaba.druid.sql.ast.statement.SQLNotNullConstraint;
+import com.alibaba.druid.sql.ast.statement.SQLNullConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLTableElement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
@@ -108,6 +111,14 @@ public class SyncDomainToSqlGenerator extends AnAction {
                 }
             });
 
+            tableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
+                int line = findLine(sqlDoc, updateDefinition.columnName);
+                if (line != -1) {
+                    sqlDoc.deleteString(sqlDoc.getLineStartOffset(line), sqlDoc.getLineEndOffset(line));
+                    sqlDoc.insertString(sqlDoc.getLineEndOffset(line), updateDefinition.toColumnSql());
+                }
+            });
+
             tableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
                 int line = findLine(sqlDoc, removeDefinition.columnName);
                 if (line != -1) {
@@ -119,6 +130,12 @@ public class SyncDomainToSqlGenerator extends AnAction {
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), addDefinition.toAlertSql(beanDefinition.tableName));
+            });
+
+            tableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
+                sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
+                sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
+                sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), updateDefinition.toAlertSql(beanDefinition.tableName));
             });
 
             tableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
@@ -155,6 +172,22 @@ public class SyncDomainToSqlGenerator extends AnAction {
             if (optional.isEmpty()) {
                 //add
                 tableSyncDefinition.addDefinitions.add(new AddDefinition(newColumn, newStatement.columns.get(newColumn), newStatement.notNullFields.contains(newColumn), preColumnName, currentFirstColumn));
+            } else {
+                // update
+                if (!newStatement.primaryKeys.contains(newColumn)) {
+                    SQLColumnDefinition currentColumn = optional.get();
+
+                    Optional<SQLColumnConstraint> currentConstraintOptional = currentColumn.getConstraints().stream().filter(f -> f instanceof SQLNullConstraint || f instanceof SQLNotNullConstraint).findFirst();
+                    if (currentConstraintOptional.isPresent()) {
+                        SQLColumnConstraint currentConstraint = currentConstraintOptional.get();
+                        boolean currentIsNotNull = currentConstraint instanceof SQLNotNullConstraint;
+                        boolean newIsNotNull = newStatement.notNullFields.contains(newColumn);
+                        if (newIsNotNull != currentIsNotNull) {
+                            UpdateDefinition updateDefinition = new UpdateDefinition(newColumn, currentColumn.getDataType().toString(), newIsNotNull ? "NOT NULL" : "NULL");
+                            tableSyncDefinition.updateDefinitions.add(updateDefinition);
+                        }
+                    }
+                }
             }
             preColumnName = newColumn;
         }
