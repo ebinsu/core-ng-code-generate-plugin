@@ -38,15 +38,17 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
     private final PsiElement statement;
     private final BeanDefinition target;
     private final JavaPsiFacade javaPsiFacade;
+    private final List<String> alreadyAssignedFiledNames;
 
     public SetBeanPropertiesBaseListPopupStep(List<BeanDefinition> listValues, Project project, JavaPsiFacade javaPsiFacade, PsiFile psiFile,
-                                              PsiElement methodBlock, PsiElement statement, BeanDefinition target) {
+                                              PsiElement methodBlock, PsiElement statement, BeanDefinition target, List<String> alreadyAssignedFiledNames) {
         this.project = project;
         this.javaPsiFacade = javaPsiFacade;
         this.psiFile = psiFile;
         this.methodBlock = methodBlock;
         this.statement = statement;
         this.target = target;
+        this.alreadyAssignedFiledNames = alreadyAssignedFiledNames;
         listValues.add(new NullBeanDefinition());
         listValues.add(new ExpandPropertiesNullBeanDefinition());
         init("Select Local Variable To Set Properties :", listValues, null);
@@ -73,8 +75,10 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         PsiElementFactory elementFactory = PsiElementFactory.getInstance(project);
         List<PsiStatement> statements = new ArrayList<>();
         target.fields.forEach((fieldName, type) -> {
-            String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
-            statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+            if (!alreadyAssignedFiledNames.contains(fieldName)) {
+                String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
+                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+            }
         });
         WriteCommandAction.runWriteCommandAction(project, () -> {
             Collections.reverse(statements);
@@ -88,6 +92,9 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         PsiElementFactory elementFactory = PsiElementFactory.getInstance(project);
         List<PsiStatement> statements = new ArrayList<>();
         target.fields.forEach((fieldName, type) -> {
+            if (alreadyAssignedFiledNames.contains(fieldName)) {
+                return;
+            }
             if (ClassUtils.isJavaBean(type)) {
                 String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, target.variableName, fieldName, target.getSimpleFieldType(fieldName).get());
                 statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
@@ -114,6 +121,9 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         List<PsiStatement> statements = new ArrayList<>();
 
         target.fields.forEach((fieldName, type) -> {
+            if (alreadyAssignedFiledNames.contains(fieldName)) {
+                return;
+            }
             String statement;
             if (selected.hasField(fieldName, type)) {
                 statement = String.format(COPY_TEMPLATE, target.variableName, fieldName, selectedVariableName, fieldName);

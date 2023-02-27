@@ -13,6 +13,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.JavaRecursiveElementVisitor;
+import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -22,6 +23,7 @@ import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import core.framework.plugin.utils.PsiUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,11 +79,12 @@ public class SetBeanPropertiesGenerator extends AnAction {
             return;
         }
         List<BeanDefinition> methodAllVariable = new ArrayList<>();
+        List<String> alreadyAssignedFiledNames = new ArrayList<>();
         findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
-        findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable);
+        findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable, alreadyAssignedFiledNames);
 
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
-        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, method, statement, focusBeanDefinition));
+        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, method, statement, focusBeanDefinition, alreadyAssignedFiledNames));
         listPopup.showInBestPositionFor(e.getDataContext());
     }
 
@@ -100,7 +103,7 @@ public class SetBeanPropertiesGenerator extends AnAction {
         return maybeMethod;
     }
 
-    private void findMethodBodyVariable(Project project, JavaPsiFacade javaPsiFacade, PsiElement method, PsiLocalVariable focusLocalVariable, List<BeanDefinition> methodAllVariable) {
+    private void findMethodBodyVariable(Project project, JavaPsiFacade javaPsiFacade, PsiElement method, PsiLocalVariable focusLocalVariable, List<BeanDefinition> methodAllVariable, List<String> alreadyAssignedFiledNames) {
         method.accept(new JavaRecursiveElementVisitor() {
                           @Override
                           public void visitLocalVariable(PsiLocalVariable localVariable) {
@@ -114,6 +117,14 @@ public class SetBeanPropertiesGenerator extends AnAction {
                                   }
                               }
                               super.visitLocalVariable(localVariable);
+                          }
+
+                          @Override
+                          public void visitAssignmentExpression(@NotNull PsiAssignmentExpression expression) {
+                              if (expression.getText().contains(focusLocalVariable.getName())) {
+                                  alreadyAssignedFiledNames.add(expression.getFirstChild().getLastChild().getText());
+                              }
+                              super.visitAssignmentExpression(expression);
                           }
                       }
         );
