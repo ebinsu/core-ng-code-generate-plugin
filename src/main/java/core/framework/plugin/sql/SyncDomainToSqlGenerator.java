@@ -70,7 +70,7 @@ public class SyncDomainToSqlGenerator extends AnAction {
         PsiClass mainClass = classes[0];
         BeanDefinition beanDefinition = new BeanDefinition(mainClass);
         if (beanDefinition.tableName == null
-                || beanDefinition.columns.isEmpty()) {
+            || beanDefinition.columns.isEmpty()) {
             return;
         }
 
@@ -97,8 +97,16 @@ public class SyncDomainToSqlGenerator extends AnAction {
         }
 
         TableSyncDefinition tableSyncDefinition = compare(currentStatement, beanDefinition);
+        SyncDomainToSqlDialogWrapper syncDomainToSqlDialogWrapper = new SyncDomainToSqlDialogWrapper(tableSyncDefinition);
+        syncDomainToSqlDialogWrapper.show();
+        if (syncDomainToSqlDialogWrapper.cancel) {
+            return;
+        }
+        List<Integer> selects = syncDomainToSqlDialogWrapper.selects.stream().sorted().toList();
+        TableSyncDefinition finalTableSyncDefinition = tableSyncDefinition.filter(selects);
+
         WriteCommandAction.runWriteCommandAction(project, () -> {
-            tableSyncDefinition.addDefinitions.forEach(addDefinition -> {
+            finalTableSyncDefinition.addDefinitions.forEach(addDefinition -> {
                 int line = -1;
                 if (addDefinition.afterColumnName != null) {
                     line = findLine(sqlDoc, addDefinition.afterColumnName);
@@ -111,7 +119,7 @@ public class SyncDomainToSqlGenerator extends AnAction {
                 }
             });
 
-            tableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
+            finalTableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
                 int line = findLine(sqlDoc, updateDefinition.columnName);
                 if (line != -1) {
                     sqlDoc.deleteString(sqlDoc.getLineStartOffset(line), sqlDoc.getLineEndOffset(line));
@@ -119,26 +127,26 @@ public class SyncDomainToSqlGenerator extends AnAction {
                 }
             });
 
-            tableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
+            finalTableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
                 int line = findLine(sqlDoc, removeDefinition.columnName);
                 if (line != -1) {
                     sqlDoc.deleteString(sqlDoc.getLineStartOffset(line) - 1, sqlDoc.getLineEndOffset(line));
                 }
             });
 
-            tableSyncDefinition.addDefinitions.forEach(addDefinition -> {
+            finalTableSyncDefinition.addDefinitions.forEach(addDefinition -> {
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), addDefinition.toAlertSql(beanDefinition.tableName));
             });
 
-            tableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
+            finalTableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), updateDefinition.toAlertSql(beanDefinition.tableName));
             });
 
-            tableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
+            finalTableSyncDefinition.removeDefinitions.forEach(removeDefinition -> {
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), "\n");
                 sqlDoc.insertString(sqlDoc.getLineEndOffset(sqlDoc.getLineCount() - 1), removeDefinition.toAlertSql(beanDefinition.tableName));

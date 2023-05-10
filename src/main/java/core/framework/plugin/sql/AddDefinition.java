@@ -9,15 +9,15 @@ import static core.framework.plugin.sql.BeanDefinition.LINE_START;
 /**
  * @author ebin
  */
-public class AddDefinition {
+public class AddDefinition implements SqlDefinition {
     public static final String template = "SELECT count(*) INTO @index FROM information_schema.`COLUMNS`\n" +
-            "WHERE table_schema = DATABASE() AND column_name = '%1$s' AND table_name = '%2$s';\n" +
-            "SET @SQL = IF(@index = 0,\n" +
-            " 'ALTER TABLE %2$s ADD COLUMN `%1$s` %3$s %4$s %5$s',\n" +
-            " 'select \\'Not Alter Column\\';'\n" +
-            ");\n" +
-            "PREPARE statement FROM @SQL;\n" +
-            "EXECUTE statement;";
+        "WHERE table_schema = DATABASE() AND column_name = '%1$s' AND table_name = '%2$s';\n" +
+        "SET @SQL = IF(@index = 0,\n" +
+        " 'ALTER TABLE %2$s ADD COLUMN `%1$s` %3$s %4$s %5$s',\n" +
+        " 'select \\'Not Alter Column\\';'\n" +
+        ");\n" +
+        "PREPARE statement FROM @SQL;\n" +
+        "EXECUTE statement;";
 
     public String columnName;
     public String dateType;
@@ -50,7 +50,17 @@ public class AddDefinition {
     public String toAlertSql(String tableName) {
         String cname = columnName.replace(COLUMN_NAME_FLAG, "");
         return String.format(template, cname, tableName, dateType, constraint,
-                Optional.ofNullable(afterColumnName).map(name -> "AFTER " + name).orElse(""));
+            Optional.ofNullable(afterColumnName).map(name -> "AFTER " + name).orElse(""));
+    }
+
+    @Override
+    public String getColumnName() {
+        return this.columnName;
+    }
+
+    @Override
+    public String getDataType() {
+        return this.dateType;
     }
 
     public String toColumnSql() {
@@ -59,5 +69,12 @@ public class AddDefinition {
             cname = COLUMN_NAME_FLAG + columnName + COLUMN_NAME_FLAG;
         }
         return LINE_START + cname + EMPTY_BLOCK + dateType + EMPTY_BLOCK + constraint + ",";
+    }
+
+    @Override
+    public String toString(int maxColumnNameLength, int maxDataTypeNameLength) {
+        String cname = columnName;
+        String formatDateType = dateType;
+        return "Add column:   " + EMPTY_BLOCK + cname + EMPTY_BLOCK + formatDateType + EMPTY_BLOCK + constraint;
     }
 }

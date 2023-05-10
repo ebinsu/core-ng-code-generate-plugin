@@ -39,5 +39,9 @@
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
+<!--        <action id="test" class="core.framework.plugin.TestPlugin" text="Test"-->
+<!--                description="Test" icon="AllIcons.Nodes.Enum">-->
+<!--            <add-to-group group-id="NewGroup" anchor="last"/>-->
+<!--        </action>-->
     </actions>
 </idea-plugin>
