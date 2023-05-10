@@ -6,13 +6,13 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.impl.source.tree.java.PsiNameValuePairImpl;
-import com.twelvemonkeys.util.LinkedSet;
 import core.framework.plugin.utils.ClassUtils;
 import core.framework.plugin.utils.PsiUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class BeanDefinition {
     public String tableName;
     // column name and type
     public Map<String, String> columns = new LinkedHashMap<>();
-    public Set<String> primaryKeys = new LinkedSet<>();
+    public Set<String> primaryKeys = new LinkedHashSet<>();
     public Set<String> notNullFields = new HashSet<>();
 
     public int maxColumnNameLength = 0;
