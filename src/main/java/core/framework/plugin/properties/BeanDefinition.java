@@ -8,7 +8,6 @@ import core.framework.plugin.utils.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,8 @@ public class BeanDefinition {
     public Map<String, String> fields = new LinkedHashMap<>();
     // filed name and simple type
     public Map<String, String> fieldSimpleNames = new LinkedHashMap<>();
+    // filed name and nullable
+    public Map<String, Boolean> fieldNullables = new LinkedHashMap<>();
 
     public BeanDefinition() {
     }
@@ -39,10 +40,10 @@ public class BeanDefinition {
         this.displayName = this.className + DISPLAY_NAME_SPLIT + variableName;
         PsiField[] classFields = typeClass.getFields();
         List<PsiField> publicFields = Arrays.stream(classFields).filter(filed -> filed.getModifierList() != null)
-                .filter(field -> !field.getModifierList().hasModifierProperty(PsiModifier.PRIVATE)
-                        && !field.getModifierList().hasModifierProperty(PsiModifier.STATIC)
-                        && !field.getModifierList().hasModifierProperty(PsiModifier.FINAL)
-                ).toList();
+            .filter(field -> !field.getModifierList().hasModifierProperty(PsiModifier.PRIVATE)
+                && !field.getModifierList().hasModifierProperty(PsiModifier.STATIC)
+                && !field.getModifierList().hasModifierProperty(PsiModifier.FINAL)
+            ).toList();
         for (PsiField field : publicFields) {
             PsiType type = field.getType();
             String canonicalText = type.getCanonicalText();
@@ -55,6 +56,7 @@ public class BeanDefinition {
                 fields.put(field.getName(), canonicalText);
             }
             fieldSimpleNames.put(field.getName(), type.getPresentableText());
+            fieldNullables.put(field.getName(), Arrays.stream(field.getAnnotations()).noneMatch(ann -> ann.getText().contains("NotNull")));
         }
     }
 

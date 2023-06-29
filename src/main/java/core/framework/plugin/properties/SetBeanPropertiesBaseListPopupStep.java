@@ -28,8 +28,11 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
     public static final String NON_PROPERTIES_JAVA_BEAN_TEMPLATE = "%1$s.%2$s=new %3$s();";
     public static final String COPY_TEMPLATE = "%1$s.%2$s=%3$s.%4$s;";
     public static final String SET_ENUM_TEMPLATE = "%1$s.%2$s=%3$s.valueOf(%4$s.%5$s.name());";
-    public static final String SET_LIST_TEMPLATE = "%1$s.%2$s=%3$s.%4$s.stream().map(this::%2$s).collect(Collectors.toList());";
+    public static final String SET_ENUM_NULLABLE_TEMPLATE = "%1$s.%2$s=Optional.ofNullable(%4$s.%5$s).map(e -> %3$s.valueOf(e.name())).orElse(null);";
+    public static final String SET_LIST_TEMPLATE = "%1$s.%2$s=%3$s.%4$s.stream().map(this::%2$s).toList();";
+    public static final String SET_LIST_NULLABLE_TEMPLATE = "%1$s.%2$s=Optional.ofNullable(%3$s.%4$s).map(list-> list.stream().map(this::%2$s).toList()).orElse(null);";
     public static final String SET_SET_TEMPLATE = "%1$s.%2$s=%3$s.%4$s.stream().map(this::%2$s).collect(Collectors.toSet());";
+    public static final String SET_SET_NULLABLE_TEMPLATE = "%1$s.%2$s=Optional.ofNullable(%3$s.%4$s).map(set-> set.stream().map(this::%2$s).collect(Collectors.toSet())).orElse(null);";
     public static final String SET_DIFFERENT_BEAN_TEMPLATE = "%1$s.%2$s=this.%2$s(%3$s.%4$s);";
 
     private final Project project;
@@ -136,13 +139,33 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                         statement = String.format(COPY_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                     } else {
                         if (ClassUtils.isEnum(type)) {
-                            statement = String.format(SET_ENUM_TEMPLATE, target.variableName, fieldName,
+                            if (selected.fieldNullables.get(selectedSimilarityField)) {
+                                statement = String.format(SET_ENUM_NULLABLE_TEMPLATE,
+                                    target.variableName,
+                                    fieldName,
                                     target.getSimpleFieldType(fieldName).get(),
-                                    selectedVariableName, selectedSimilarityField);
+                                    selectedVariableName,
+                                    selectedSimilarityField);
+                            } else {
+                                statement = String.format(SET_ENUM_TEMPLATE,
+                                    target.variableName,
+                                    fieldName,
+                                    target.getSimpleFieldType(fieldName).get(),
+                                    selectedVariableName,
+                                    selectedSimilarityField);
+                            }
                         } else if (ClassUtils.isList(type)) {
-                            statement = String.format(SET_LIST_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            if (selected.fieldNullables.get(selectedSimilarityField)) {
+                                statement = String.format(SET_LIST_NULLABLE_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            } else {
+                                statement = String.format(SET_LIST_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            }
                         } else if (ClassUtils.isSet(type)) {
-                            statement = String.format(SET_SET_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            if (selected.fieldNullables.get(selectedSimilarityField)) {
+                                statement = String.format(SET_SET_NULLABLE_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            } else {
+                                statement = String.format(SET_SET_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                            }
                         } else if (ClassUtils.isJavaBean(fieldName)) {
                             statement = String.format(SET_DIFFERENT_BEAN_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                         } else {
