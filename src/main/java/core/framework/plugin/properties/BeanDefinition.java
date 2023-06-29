@@ -88,7 +88,8 @@ public class BeanDefinition {
             }
             return first;
         } else {
-            return Optional.empty();
+            String lowerCase = filedName.toLowerCase();
+            return fields.keySet().stream().map(String::toLowerCase).filter(f -> f.contains(lowerCase)).findFirst();
         }
     }
 
