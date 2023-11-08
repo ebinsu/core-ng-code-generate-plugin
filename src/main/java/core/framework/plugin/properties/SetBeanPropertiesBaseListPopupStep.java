@@ -35,6 +35,9 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
     public static final String SET_SET_NULLABLE_TEMPLATE = "%1$s.%2$s=Optional.ofNullable(%3$s.%4$s).map(set-> set.stream().map(this::%2$s).collect(Collectors.toSet())).orElse(null);";
     public static final String SET_DIFFERENT_BEAN_TEMPLATE = "%1$s.%2$s=this.%2$s(%3$s.%4$s);";
 
+    public static final String DOUBLE_TO_BIG_DECIMAL_TEMPLATE = "%1$s.%2$s=Maths.toBigDecimal(%3$s.%4$s);";
+    public static final String BIG_DECIMAL_TO_DOUBLE_TEMPLATE = "%1$s.%2$s=Maths.toDouble(%3$s.%4$s);";
+
     private final Project project;
     private final PsiFile psiFile;
     private final PsiElement methodBlock;
@@ -138,6 +141,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                     if (fieldType.isPresent() && fieldType.get().equals(type)) {
                         statement = String.format(COPY_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                     } else {
+                        String selectedSimilarityFieldType = fieldType.get();
                         if (ClassUtils.isEnum(type)) {
                             if (selected.fieldNullables.get(selectedSimilarityField)) {
                                 statement = String.format(SET_ENUM_NULLABLE_TEMPLATE,
@@ -166,6 +170,10 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                             } else {
                                 statement = String.format(SET_SET_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                             }
+                        } else if (ClassUtils.isDouble(selectedSimilarityFieldType) && ClassUtils.isBigDecimal(type)) {
+                            statement = String.format(DOUBLE_TO_BIG_DECIMAL_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
+                        } else if (ClassUtils.isBigDecimal(selectedSimilarityFieldType) && ClassUtils.isDouble(type)) {
+                            statement = String.format(BIG_DECIMAL_TO_DOUBLE_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                         } else if (ClassUtils.isJavaBean(fieldName)) {
                             statement = String.format(SET_DIFFERENT_BEAN_TEMPLATE, target.variableName, fieldName, selectedVariableName, selectedSimilarityField);
                         } else {

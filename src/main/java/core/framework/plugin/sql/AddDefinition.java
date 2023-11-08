@@ -33,9 +33,9 @@ public class AddDefinition implements SqlDefinition {
             if (dateType.contains(MysqlDialect.TIMESTAMP)) {
                 this.constraint = "NOT NULL DEFAULT CURRENT_TIMESTAMP(6)";
             } else if (dateType.contains(MysqlDialect.BIT)) {
-                this.constraint = "NOT NULL DEFAULT 0";
+                this.constraint = "NOT NULL DEFAULT b'0'";
             } else {
-                this.constraint = "NOT NULL DEFAULT TODO";
+                this.constraint = "NOT NULL";
             }
         } else {
             this.constraint = "NULL";

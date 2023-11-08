@@ -1,5 +1,6 @@
 package core.framework.plugin.utils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -23,6 +24,7 @@ public final class ClassUtils {
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getCanonicalName();
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getCanonicalName();
     public static final String LOCAL_DATE = LocalDate.class.getCanonicalName();
+    public static final String BIG_DECIMAL = BigDecimal.class.getCanonicalName();
 
     public static final String APP_CLASS = "app.";
 
@@ -35,6 +37,14 @@ public final class ClassUtils {
 
     public static boolean isList(String type) {
         return type.contains(LIST_CLASS);
+    }
+
+    public static boolean isDouble(String type) {
+        return type.contains(DOUBLE);
+    }
+
+    public static boolean isBigDecimal(String type) {
+        return type.contains(BIG_DECIMAL);
     }
 
     public static boolean isSet(String type) {

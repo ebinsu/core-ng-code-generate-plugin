@@ -87,7 +87,7 @@ public class BeanDefinition {
                 int i = maxColumnTypeLength - columnType.length();
                 columnSql.append(SINGLE_EMPTY_BLOCK.repeat(i));
             }
-            columnSql.append(EMPTY_BLOCK).append(this.notNullFields.contains(columnName) ? "NOT NULL" : "NULL").append(",\n");
+            columnSql.append(EMPTY_BLOCK).append(this.notNullFields.contains(columnName) || this.primaryKeys.contains(columnName) ? "NOT NULL" : "NULL").append(",\n");
             sql.append(columnSql);
         }
 

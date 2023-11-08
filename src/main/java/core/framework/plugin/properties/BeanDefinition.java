@@ -74,22 +74,18 @@ public class BeanDefinition {
         OptionalInt min = collect.keySet().stream().mapToInt(k -> k).min();
         if (min.isPresent() && min.getAsInt() <= 3) {
             List<String> candidate = collect.get(min.getAsInt());
-            Optional<String> first = candidate.stream().filter(f -> fileType.contains(fields.get(f))).findFirst();
+            if (candidate.isEmpty()) {
+                return Optional.empty();
+            }
+            String finalGenFileType = genFileType;
+            Optional<String> first = candidate.stream().filter(f -> finalGenFileType.contains(fields.get(f))).findFirst();
             if (first.isEmpty()) {
-                String finalGenFileType = genFileType;
-                first = candidate.stream().filter(f -> {
-                    String candidateType = fields.getOrDefault(f, "");
-                    int j = candidateType.indexOf("<");
-                    if (j != -1) {
-                        candidateType = candidateType.substring(0, j);
-                    }
-                    return finalGenFileType.contains(candidateType);
-                }).findFirst();
+                first = candidate.stream().findFirst();
             }
             return first;
         } else {
             String lowerCase = filedName.toLowerCase();
-            return fields.keySet().stream().map(String::toLowerCase).filter(f -> f.contains(lowerCase)).findFirst();
+            return fields.keySet().stream().filter(f -> f.toLowerCase().contains(lowerCase)).findFirst();
         }
     }
 
