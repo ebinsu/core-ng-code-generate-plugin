@@ -1,11 +1,18 @@
 package core.framework.plugin.sql;
 
 import com.intellij.lang.jvm.annotation.JvmAnnotationAttribute;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
+import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiLiteralExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.impl.source.tree.java.PsiNameValuePairImpl;
+import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
+import com.intellij.psi.search.GlobalSearchScope;
 import core.framework.plugin.utils.ClassUtils;
 import core.framework.plugin.utils.PsiUtils;
 
@@ -36,10 +43,13 @@ public class BeanDefinition {
     public int maxColumnNameLength = 0;
     public int maxColumnTypeLength = 0;
 
+    public JavaPsiFacade javaPsiFacade;
+
     public BeanDefinition() {
     }
 
-    public BeanDefinition(PsiClass beanClass) {
+    public BeanDefinition(JavaPsiFacade javaPsiFacade, PsiClass beanClass) {
+        this.javaPsiFacade = javaPsiFacade;
         this.tableName = findTableName(beanClass);
         PsiField[] classFields = beanClass.getFields();
         for (PsiField field : classFields) {
@@ -108,8 +118,30 @@ public class BeanDefinition {
                 List<JvmAnnotationAttribute> attributes = annotation.getAttributes();
                 for (JvmAnnotationAttribute attribute : attributes) {
                     if ("name".equals(attribute.getAttributeName())) {
-                        if (attribute instanceof PsiNameValuePairImpl) {
-                            return ((PsiNameValuePairImpl) attribute).getLiteralValue();
+                        if (attribute instanceof PsiNameValuePairImpl pair) {
+                            PsiAnnotationMemberValue value = pair.getValue();
+                            if (value instanceof PsiReferenceExpression referenceExpression) {
+                                PsiClass refClass = javaPsiFacade.findClass(
+                                    ((PsiReferenceExpressionImpl) referenceExpression.getFirstChild()).getCanonicalText(),
+                                    GlobalSearchScope.allScope(beanClass.getProject())
+                                );
+                                if (refClass == null) {
+                                    return null;
+                                }
+                                PsiField fieldByName = refClass.findFieldByName(referenceExpression.getReferenceName(), true);
+                                if (fieldByName == null) {
+                                    return null;
+                                }
+                                return Arrays.stream(fieldByName.getChildren()).filter(f -> f instanceof PsiLiteralExpression).findFirst().map(m -> {
+                                    String text = m.getText();
+                                    if (text.contains("\"")) {
+                                        text = text.replace("\"", "");
+                                    }
+                                    return text;
+                                }).orElse(null);
+                            } else {
+                                return pair.getLiteralValue();
+                            }
                         }
                     }
                 }

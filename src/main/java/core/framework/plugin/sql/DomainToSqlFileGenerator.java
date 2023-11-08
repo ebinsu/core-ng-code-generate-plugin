@@ -11,6 +11,7 @@ import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
@@ -44,9 +45,10 @@ public class DomainToSqlFileGenerator extends AnAction {
             return;
         }
         PsiClass mainClass = classes[0];
-        BeanDefinition beanDefinition = new BeanDefinition(mainClass);
+        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
+        BeanDefinition beanDefinition = new BeanDefinition(javaPsiFacade, mainClass);
         if (beanDefinition.tableName == null
-                || beanDefinition.columns.isEmpty()) {
+            || beanDefinition.columns.isEmpty()) {
             return;
         }
         PsiDirectory directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile);
