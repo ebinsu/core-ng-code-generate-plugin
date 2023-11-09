@@ -33,7 +33,7 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
         <action id="SyncDomainToSqlGenerator" class="core.framework.plugin.sql.SyncDomainToSqlGenerator"
-                    text="Sync with Domain" description="Sync domain to sql file" icon="AllIcons.Actions.Refresh">
+                    text="Sync with Domain" description="Sync domain to sql file" icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="SynchronizeCurrentFile"/>
         </action>
         <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"
@@ -47,6 +47,10 @@
         <action id="AddEnvProperties" class="core.framework.plugin.AddEnvProperties" text="Add Env Properties"
                 description="AddEnvProperties" icon="AllIcons.Nodes.Property">
             <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+        <action id="UpdateDependenceVersion" class="core.framework.plugin.UpdateDependenceVersion"
+                text="Update Dependence Version" description="Update dependence version" icon="AllIcons.Ide.Notification.IdeUpdate">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="VersionControlsGroup"/>
         </action>
 <!--        <action id="test" class="core.framework.plugin.TestPlugin" text="Test"-->
 <!--                description="Test" icon="AllIcons.Nodes.Enum">-->

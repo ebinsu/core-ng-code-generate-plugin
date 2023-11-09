@@ -18,3 +18,4 @@ Generate code with core ng style
 1. jump flyway source [done]
 2. new properties files [done]
 3. add properties [done]
+4. update version
