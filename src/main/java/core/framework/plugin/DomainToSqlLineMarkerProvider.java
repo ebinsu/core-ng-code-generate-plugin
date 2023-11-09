@@ -91,9 +91,10 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
             path = path.substring(lasted + 1);
 
             String finalPath = path;
-            VirtualFile virtualFile = files.stream().filter(f -> f.getPath().contains(finalPath)).findFirst().orElse(
-                files.stream().findFirst().get()
-            );
+            VirtualFile virtualFile = files.stream().filter(f -> f.getPath().contains(finalPath)).findFirst().orElse(null);
+            if (virtualFile == null) {
+                return;
+            }
             PsiFile file = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
             NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.Providers.Mysql)
                 .setAlignment(GutterIconRenderer.Alignment.CENTER)
