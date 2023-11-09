@@ -21,6 +21,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiEnumConstant;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
@@ -35,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -123,11 +125,14 @@ public class CopyEnumGenerator extends AnAction {
         PsiElementFactory psiElementFactory = PsiElementFactory.getInstance(project);
 
         StringBuilder sb = new StringBuilder(String.format(ENUM_TEMPLATE, generateEnumName));
-        int i = 1;
         for (PsiField field : enumClassFields) {
-            String annotationValue = getAnnotationValue(field);
-            sb.append(String.format(ENUM_FIELD_TEMPLATE, field.getName(), annotationValue)).append(i == enumClassFields.length ? "" : ",").append("\n");
-            i++;
+            if (field instanceof PsiEnumConstant) {
+                String annotationValue = getAnnotationValue(field);
+                sb.append(String.format(ENUM_FIELD_TEMPLATE, field.getName(), annotationValue)).append(",").append("\n");
+            }
+        }
+        if (sb.indexOf(",") != -1) {
+            sb.delete(sb.length() - 2, sb.length() - 1);
         }
         sb.append("}");
         PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText(JavaLanguage.INSTANCE, sb.toString());
@@ -185,7 +190,16 @@ public class CopyEnumGenerator extends AnAction {
             return null;
         }
         int index = url.indexOf(JAVA_DIR);
-        String baseDir = Arrays.stream(url.substring(index + JAVA_DIR.length()).split("/")).filter(StringUtils::isNoneBlank).findFirst().orElse(null);
+        List<String> stringList = Arrays.stream(url.substring(index + JAVA_DIR.length()).split("/")).filter(StringUtils::isNoneBlank).toList();
+        String baseDir = null;
+        for (String dir : stringList) {
+            if (baseDir == null) {
+                baseDir = dir;
+            } else {
+                baseDir = baseDir + "/" + dir;
+                break;
+            }
+        }
         if (baseDir == null) {
             baseDir = Arrays.stream(javaDirectory.getVirtualFile().getChildren()).filter(VirtualFile::isDirectory).findFirst().map(f -> FilenameUtils.getBaseName(f.getName())).orElse(null);
         }
@@ -245,6 +259,9 @@ public class CopyEnumGenerator extends AnAction {
                         return null;
                     }
                 }).orElse(null);
+            }
+            if (annValue == null) {
+                annValue = "\"" + field.getName().toUpperCase() + "\"";
             }
         } else {
             annValue = "\"" + field.getName().toUpperCase() + "\"";
