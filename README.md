@@ -12,3 +12,9 @@ Generate code with core ng style
 
 ## 3. 按 Domain 属性生成 sql 文件
 ![doamin_to_sql.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/doamin_to_sql.gif)
+
+
+# Roadmap
+1. jump flyway source [done]
+2. new properties files [done]
+3. add properties [done]

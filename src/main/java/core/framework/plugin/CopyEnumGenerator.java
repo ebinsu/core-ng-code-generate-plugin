@@ -108,7 +108,7 @@ public class CopyEnumGenerator extends AnAction {
         }
         PsiClass selectEnumClass = classes[0];
 
-        CopyEnumDialogWrapper dialog = new CopyEnumDialogWrapper(selectEnumClass.getName());
+        InputDialogWrapper dialog = new InputDialogWrapper(selectEnumClass.getName());
         dialog.show();
         String generateEnumName = dialog.inputText;
         if (generateEnumName == null) {
