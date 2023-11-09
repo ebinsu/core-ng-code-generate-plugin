@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'core.framework'
-version '1.1.0'
+version '1.0.0'
 
 repositories {
     mavenCentral()
@@ -34,7 +34,7 @@ patchPluginXml {
          <li>创建多环境 properties 文件</li>
          <li>添加多环境 properties 文件属性</li>
          <li>Java 局部变量赋值代码生成</li>
-        </ul>
+       </ul>
       """
 }
 test {

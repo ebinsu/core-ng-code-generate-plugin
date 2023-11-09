@@ -4,41 +4,8 @@
     <vendor email="ebinsu@chancetop.com" url="https://github.com/ebinsu?tab=repositories">Ebin</vendor>
 
     <description><![CDATA[
-    <a href="https://github.com/ebinsu/core-ng-code-generate-plugin#readme">帮助文档</a>
-    <ul>
-        <li>
-            <div>更新依赖版本</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/update_version.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>Domain 跳转 migrate sql 文件</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/navToSql.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>Domain 生成 migrate sql 文件</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/sync_domain_to_sql.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>同步 Domain 新增字段到 migrate sql 文件</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/doamin_to_sql.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>复制枚举类并添加单元测试</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/copy_enum.gif.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>创建多环境 properties 文件</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/new_properties_file.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>添加多环境 properties 文件属性</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/add_properties.gif" width="600" height="300"></div>
-        </li>
-        <li>
-            <div>Java 局部变量赋值代码生成</div>
-            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/gen_code.gif" width="600" height="300"></div>
-        </li>
-    </ul>
+    This is a tool to improve the development efficiency of core ng.
+    <a href="https://github.com/ebinsu/core-ng-code-generate-plugin#readme">How To Used</a>
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
