@@ -25,8 +25,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      <ul>
+         <li>更新依赖版本</li>
+         <li>Domain 跳转 migrate sql 文件</li>
+         <li>Domain 生成 migrate sql 文件</li>
+         <li>同步 Domain 新增字段到 migrate sql 文件</li>
+         <li>复制枚举类并添加单元测试</li>
+         <li>创建多环境 properties 文件</li>
+         <li>添加多环境 properties 文件属性</li>
+         <li>Java 局部变量赋值代码生成</li>
+        </ul>
+      """
 }
 test {
     useJUnitPlatform()

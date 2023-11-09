@@ -4,7 +4,40 @@
     <vendor email="ebinsu@chancetop.com" url="https://github.com/ebinsu?tab=repositories">Ebin</vendor>
 
     <description><![CDATA[
-    Generate code for use core ng code style.<br>
+    <ul>
+        <li>
+            <div>更新依赖版本</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/update_version.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>Domain 跳转 migrate sql 文件</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/navToSql.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>Domain 生成 migrate sql 文件</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/sync_domain_to_sql.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>同步 Domain 新增字段到 migrate sql 文件</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/doamin_to_sql.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>复制枚举类并添加单元测试</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/copy_enum.gif.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>创建多环境 properties 文件</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/new_properties_file.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>添加多环境 properties 文件属性</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/add_properties.gif" width="600" height="300"></div>
+        </li>
+        <li>
+            <div>Java 局部变量赋值代码生成</div>
+            <div><img src="https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/gen_code.gif" width="600" height="300"></div>
+        </li>
+    </ul>
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
@@ -14,7 +47,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <codeInsight.lineMarkerProvider language="JAVA" implementationClass="core.framework.plugin.DomainToSqlLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="core.framework.plugin.DomainToSqlLineMarkerProvider"/>
     </extensions>
 
     <actions>
@@ -33,14 +67,16 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
         <action id="SyncDomainToSqlGenerator" class="core.framework.plugin.sql.SyncDomainToSqlGenerator"
-                    text="Sync with Domain" description="Sync domain to sql file" icon="AllIcons.Ide.Notification.IdeUpdate">
+                text="Sync with Domain" description="Sync domain to sql file"
+                icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="SynchronizeCurrentFile"/>
         </action>
         <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
-        <action id="NewEnvPropertiesFile" class="core.framework.plugin.NewEnvPropertiesFile" text="New Env Properties File"
+        <action id="NewEnvPropertiesFile" class="core.framework.plugin.NewEnvPropertiesFile"
+                text="New Env Properties File"
                 description="NewEnvPropertiesFile" icon="AllIcons.Nodes.Property">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
@@ -49,12 +85,13 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
         <action id="UpdateDependenceVersion" class="core.framework.plugin.UpdateDependenceVersion"
-                text="Update Dependence Version" description="Update dependence version" icon="AllIcons.Ide.Notification.IdeUpdate">
+                text="Update Dependence Version" description="Update dependence version"
+                icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="VersionControlsGroup"/>
         </action>
-<!--        <action id="test" class="core.framework.plugin.TestPlugin" text="Test"-->
-<!--                description="Test" icon="AllIcons.Nodes.Enum">-->
-<!--            <add-to-group group-id="NewGroup" anchor="last"/>-->
-<!--        </action>-->
+        <!--        <action id="test" class="core.framework.plugin.TestPlugin" text="Test"-->
+        <!--                description="Test" icon="AllIcons.Nodes.Enum">-->
+        <!--            <add-to-group group-id="NewGroup" anchor="last"/>-->
+        <!--        </action>-->
     </actions>
 </idea-plugin>

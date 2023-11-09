@@ -3,6 +3,7 @@ package core.framework.plugin;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
+import com.intellij.icons.AllIcons;
 import com.intellij.lang.jvm.annotation.JvmAnnotationAttribute;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
@@ -94,7 +95,7 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
                 files.stream().findFirst().get()
             );
             PsiFile file = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
-            NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(PlatformIcons.SYMLINK_ICON)
+            NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.Providers.Mysql)
                 .setAlignment(GutterIconRenderer.Alignment.CENTER)
                 .setTargets(file)
                 .setTooltipText("Navigation to db migration sql file");
