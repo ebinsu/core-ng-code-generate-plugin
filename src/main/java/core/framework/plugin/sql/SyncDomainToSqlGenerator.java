@@ -12,6 +12,7 @@ import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.util.TreeClassChooserFactory;
 import com.intellij.ide.util.TreeFileChooser;
+import com.intellij.ide.util.TreeFileChooserDialog;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -58,7 +59,8 @@ public class SyncDomainToSqlGenerator extends AnAction {
         }
 
         TreeClassChooserFactory instance = TreeClassChooserFactory.getInstance(project);
-        TreeFileChooser chooser = instance.createFileChooser("Choose Domain To Generate Sql File.", null, JavaFileType.INSTANCE, null, true, false);
+        TreeFileChooserDialog chooser = (TreeFileChooserDialog) instance.createFileChooser("Choose Domain To Generate Sql File.", null, JavaFileType.INSTANCE, null, true, false);
+        chooser.setSize(900, 400);
         chooser.showDialog();
         PsiFile psiFile = chooser.getSelectedFile();
         if (psiFile == null) {

@@ -3,6 +3,7 @@ package core.framework.plugin;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.util.TreeClassChooserFactory;
 import com.intellij.ide.util.TreeFileChooser;
+import com.intellij.ide.util.TreeFileChooserDialog;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -42,20 +43,20 @@ import java.util.stream.Collectors;
 public class CopyEnumGenerator extends AnAction {
     public static final String JAVA_DIR = "/src/main/java";
     public static final String ENUM_TEMPLATE = "import core.framework.api.json.Property;\n" +
-            "\n" +
-            "public enum %1$s {\n";
+        "\n" +
+        "public enum %1$s {\n";
     public static final String ENUM_FIELD_TEMPLATE = "    @Property(name = %2$s)\n" +
-            "    %1$s";
+        "    %1$s";
 
     public static final String TEST_CLASS_TEMPLATE = "import core.framework.test.Assertions;\n" +
-            "import org.junit.jupiter.api.Test;\n" +
-            "\n" +
-            "class EnumTest {\n" +
-            "    @Test\n" +
-            "    void test%1$s() {\n" +
-            "        Assertions.assertEnumClass(%2$s.class).hasExactlyConstantsAs(%3$s.class);\n" +
-            "    }\n" +
-            "}";
+        "import org.junit.jupiter.api.Test;\n" +
+        "\n" +
+        "class EnumTest {\n" +
+        "    @Test\n" +
+        "    void test%1$s() {\n" +
+        "        Assertions.assertEnumClass(%2$s.class).hasExactlyConstantsAs(%3$s.class);\n" +
+        "    }\n" +
+        "}";
     public static final String TEST_METHOD_TEMPLATE = "@Test void test%1$s() {Assertions.assertEnumClass(%2$s.class).hasExactlyConstantsAs(%3$s.class);}";
 
     @Override
@@ -88,14 +89,15 @@ public class CopyEnumGenerator extends AnAction {
         }
 
         TreeClassChooserFactory instance = TreeClassChooserFactory.getInstance(project);
-        TreeFileChooser chooser = instance.createFileChooser("Choose Domain To Generate Sql File.", null,
-                JavaFileType.INSTANCE, file -> {
-                    FileType fileType = file.getFileType();
-                    if (fileType instanceof JavaFileType) {
-                        return Arrays.stream(((PsiJavaFile) file).getClasses()).anyMatch(PsiClass::isEnum);
-                    }
-                    return true;
-                }, true, false);
+        TreeFileChooserDialog chooser = (TreeFileChooserDialog) instance.createFileChooser("Choose Domain To Generate Sql File.", null,
+            JavaFileType.INSTANCE, file -> {
+                FileType fileType = file.getFileType();
+                if (fileType instanceof JavaFileType) {
+                    return Arrays.stream(((PsiJavaFile) file).getClasses()).anyMatch(PsiClass::isEnum);
+                }
+                return true;
+            }, true, false);
+        chooser.setSize(900, 400);
         chooser.showDialog();
         PsiFile selectPsiFile = chooser.getSelectedFile();
         if (selectPsiFile == null) {
@@ -162,7 +164,7 @@ public class CopyEnumGenerator extends AnAction {
                 String fullSelectEnumName = selectEnumPackage + "." + selectEnumClass.getName();
                 if (enumTestVF == null) {
                     PsiFile testClassFile = PsiFileFactory.getInstance(project).createFileFromText(JavaLanguage.INSTANCE,
-                            String.format(TEST_CLASS_TEMPLATE, methodName, fullGenerateEnumName, fullSelectEnumName));
+                        String.format(TEST_CLASS_TEMPLATE, methodName, fullGenerateEnumName, fullSelectEnumName));
                     testClassFile.setName("EnumTest.java");
                     PsiDirectory directory = psiDirectoryFactory.createDirectory(testDirVF);
                     directory.add(testClassFile);

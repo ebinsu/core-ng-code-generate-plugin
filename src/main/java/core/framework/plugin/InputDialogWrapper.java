@@ -24,6 +24,7 @@ public class InputDialogWrapper extends DialogWrapper {
         super(true); // use current window as parent
         setTitle(title);
         textField = new EditorTextField(defaultName);
+        textField.setPreferredWidth(800);
         init();
     }
 
