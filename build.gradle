@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'core.framework'
-version '1.0.0'
+version '1.0.1'
 
 repositories {
     mavenCentral()
@@ -13,7 +13,7 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
     implementation group: 'com.alibaba', name: 'druid', version: '1.2.11'
 
 }
@@ -26,7 +26,7 @@ intellij {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>更新依赖版本</li>
+         <li>更新依赖包版本变量</li>
          <li>Domain 跳转 migrate sql 文件</li>
          <li>Domain 生成 migrate sql 文件</li>
          <li>同步 Domain 新增字段到 migrate sql 文件</li>
