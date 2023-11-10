@@ -94,8 +94,7 @@ public class SetBeanPropertiesGenerator extends AnAction {
         do {
             maybeMethod = maybeMethod.getParent();
             if (maybeMethod instanceof ASTNode) {
-                System.out.println(((ASTNode) maybeMethod).getElementType().getDebugName());
-                isMethod = "METHOD".equals(((ASTNode) maybeMethod).getElementType().getDebugName());
+                isMethod = "METHOD".equals(((ASTNode) maybeMethod).getElementType().toString());
             } else {
                 isMethod = true;
             }
