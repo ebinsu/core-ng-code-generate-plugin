@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.16.0'
     id 'java'
 }
 
@@ -18,9 +18,9 @@ dependencies {
 
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
+// See https://github.com/JetBrains/gradlpatchPluginXml e-intellij-plugin/
 intellij {
-    version = '2023.1'
+    version = '2023.2'
     plugins = ['java']
 }
 patchPluginXml {
