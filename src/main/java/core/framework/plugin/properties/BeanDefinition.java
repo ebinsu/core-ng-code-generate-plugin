@@ -40,10 +40,12 @@ public class BeanDefinition {
         this.displayName = this.className + DISPLAY_NAME_SPLIT + variableName;
         PsiField[] classFields = typeClass.getFields();
         List<PsiField> publicFields = Arrays.stream(classFields).filter(filed -> filed.getModifierList() != null)
-            .filter(field -> !field.getModifierList().hasModifierProperty(PsiModifier.PRIVATE)
-                && !field.getModifierList().hasModifierProperty(PsiModifier.STATIC)
-                && !field.getModifierList().hasModifierProperty(PsiModifier.FINAL)
-            ).toList();
+                .filter(field -> !field.getModifierList().hasModifierProperty(PsiModifier.PRIVATE)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.STATIC)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.FINAL)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.PROTECTED)
+                        && !field.getModifierList().hasModifierProperty(PsiModifier.VOLATILE)
+                ).toList();
         for (PsiField field : publicFields) {
             PsiType type = field.getType();
             String canonicalText = type.getCanonicalText();

@@ -29,6 +29,7 @@
                 text="Set Properties" description="Set bean properties">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
         </action>
+
         <action id="DomainToSqlFileGenerator" class="core.framework.plugin.sql.DomainToSqlFileGenerator"
                 text="New Sql File For Domain"
                 description="Domain to sql file" icon="AllIcons.FileTypes.Text">
@@ -39,10 +40,17 @@
                 icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="SynchronizeCurrentFile"/>
         </action>
+        <action id="AddIndex" class="core.framework.plugin.sql.AddIndex"
+                text="Add Index" description="Add index"
+                icon="AllIcons.Providers.Mysql">
+            <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="Generate"/>
+        </action>
+
         <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
+
         <action id="NewEnvPropertiesFile" class="core.framework.plugin.NewEnvPropertiesFile"
                 text="New Env Properties File"
                 description="NewEnvPropertiesFile" icon="AllIcons.Nodes.Property">
@@ -52,11 +60,13 @@
                 description="AddEnvProperties" icon="AllIcons.Nodes.Property">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
+
         <action id="UpdateDependenceVersion" class="core.framework.plugin.UpdateDependenceVersion"
                 text="Update Dependence Version" description="Update dependence version"
                 icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="VersionControlsGroup"/>
         </action>
+
         <!--        <action id="test" class="core.framework.plugin.TestPlugin" text="Test"-->
         <!--                description="Test" icon="AllIcons.Nodes.Enum">-->
         <!--            <add-to-group group-id="NewGroup" anchor="last"/>-->

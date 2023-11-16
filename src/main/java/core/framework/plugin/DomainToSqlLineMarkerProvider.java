@@ -8,24 +8,13 @@ import com.intellij.lang.jvm.annotation.JvmAnnotationAttribute;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiAnnotationMemberValue;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiLiteralExpression;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.psi.impl.source.tree.java.PsiNameValuePairImpl;
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.PlatformIcons;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -54,8 +43,8 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
                                 PsiAnnotationMemberValue value = pair.getValue();
                                 if (value instanceof PsiReferenceExpression referenceExpression) {
                                     PsiClass refClass = javaPsiFacade.findClass(
-                                        ((PsiReferenceExpressionImpl) referenceExpression.getFirstChild()).getCanonicalText(),
-                                        GlobalSearchScope.allScope(element.getProject())
+                                            ((PsiReferenceExpressionImpl) referenceExpression.getFirstChild()).getCanonicalText(),
+                                            GlobalSearchScope.allScope(element.getProject())
                                     );
                                     if (refClass != null) {
                                         PsiField fieldByName = refClass.findFieldByName(referenceExpression.getReferenceName(), true);
@@ -97,9 +86,9 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
             }
             PsiFile file = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
             NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.Providers.Mysql)
-                .setAlignment(GutterIconRenderer.Alignment.CENTER)
-                .setTargets(file)
-                .setTooltipText("Navigation to db migration sql file");
+                    .setAlignment(GutterIconRenderer.Alignment.CENTER)
+                    .setTargets(file)
+                    .setTooltipText("Navigate to " + virtualFile.getName());
             PsiElement nameIdentifier = owner.getNameIdentifier();
             if (nameIdentifier != null) {
                 result.add(builder.createLineMarkerInfo(nameIdentifier));
