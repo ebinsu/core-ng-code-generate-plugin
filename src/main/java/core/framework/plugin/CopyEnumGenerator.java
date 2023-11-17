@@ -91,14 +91,14 @@ public class CopyEnumGenerator extends AnAction {
         }
 
         TreeClassChooserFactory instance = TreeClassChooserFactory.getInstance(project);
-        TreeFileChooserDialog chooser = (TreeFileChooserDialog) instance.createFileChooser("Choose Domain To Generate Sql File.", null,
+        TreeFileChooserDialog chooser = (TreeFileChooserDialog) instance.createFileChooser("Choose Enum Class", null,
             JavaFileType.INSTANCE, file -> {
                 FileType fileType = file.getFileType();
                 if (fileType instanceof JavaFileType) {
                     return Arrays.stream(((PsiJavaFile) file).getClasses()).anyMatch(PsiClass::isEnum);
                 }
                 return true;
-            }, true, false);
+            }, true, true);
         chooser.setSize(900, 400);
         chooser.showDialog();
         PsiFile selectPsiFile = chooser.getSelectedFile();
