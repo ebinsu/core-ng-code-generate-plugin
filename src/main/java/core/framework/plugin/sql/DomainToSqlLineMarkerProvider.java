@@ -1,4 +1,4 @@
-package core.framework.plugin;
+package core.framework.plugin.sql;
 
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;

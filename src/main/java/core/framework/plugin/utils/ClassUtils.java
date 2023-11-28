@@ -7,8 +7,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static core.framework.plugin.utils.PsiUtils.JAVA_PACKAGE;
-
 /**
  * @author ebin
  */
@@ -29,6 +27,34 @@ public final class ClassUtils {
     public static final String APP_CLASS = "app.";
 
     private ClassUtils() {
+    }
+
+    public static boolean isInteger(String type) {
+        return type.contains(INTEGER);
+    }
+
+    public static boolean isLong(String type) {
+        return type.contains(LONG);
+    }
+
+    public static boolean isBoolean(String type) {
+        return type.contains(BOOLEAN);
+    }
+
+    public static boolean isZonedDateTime(String type) {
+        return type.contains(ZONED_DATE_TIME);
+    }
+
+    public static boolean isLocalDateTime(String type) {
+        return type.contains(LOCAL_DATE_TIME);
+    }
+
+    public static boolean isLocalDate(String type) {
+        return type.contains(LOCAL_DATE);
+    }
+
+    public static boolean isString(String type) {
+        return type.contains(STRING);
     }
 
     public static boolean isEnum(String type) {
