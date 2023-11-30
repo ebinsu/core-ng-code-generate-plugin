@@ -29,6 +29,11 @@
                 text="Set Properties" description="Set bean properties">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
         </action>
+        <action id="MockBeanPropertiesGenerator" class="core.framework.plugin.mock.MockBeanGenerator"
+                text="Mock Pojo Value" description="Mock pojo value">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
 
         <action id="DomainToSqlFileGenerator" class="core.framework.plugin.sql.DomainToSqlFileGenerator"
                 text="New Sql File For Domain"

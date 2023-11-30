@@ -10,22 +10,12 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.JavaRecursiveElementVisitor;
-import com.intellij.psi.PsiAssignmentExpression;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementFactory;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiLocalVariable;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiParameterList;
-import com.intellij.psi.PsiStatement;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import core.framework.plugin.properties.BeanDefinition;
 import core.framework.plugin.utils.ClassUtils;
 import core.framework.plugin.utils.PsiUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -71,8 +61,8 @@ public class MockBeanGenerator extends AnAction {
         }
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
         PsiClass selectLocalVariableTypeClass = javaPsiFacade.findClass(
-            focusLocalVariableType.getCanonicalText(),
-            GlobalSearchScope.allScope(project)
+                focusLocalVariableType.getCanonicalText(),
+                GlobalSearchScope.allScope(project)
         );
         if (selectLocalVariableTypeClass == null) {
             return;
@@ -99,14 +89,18 @@ public class MockBeanGenerator extends AnAction {
                 return;
             }
             if (ClassUtils.isJavaBean(type)) {
-//                String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, target.variableName, fieldName, target.getSimpleFieldType(fieldName).get());
-//                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
-//                target.getFieldType(fieldName).ifPresent(beanClassStr -> {
-//                    String name = target.variableName + "." + fieldName;
-//                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, methodBlock, statements);
-//                });
+                String statementStr = String.format(JAVA_BEAN_TEMPLATE, focusBeanDefinition.variableName, fieldName, focusBeanDefinition.getSimpleFieldType(fieldName).get());
+                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+                focusBeanDefinition.getFieldType(fieldName).ifPresent(beanClassStr -> {
+                    String name = focusBeanDefinition.variableName + "." + fieldName;
+                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, method, statements, 0);
+                });
+            } else if (ClassUtils.isEnum(type)) {
+                String mock = focusBeanDefinition.getSimpleFieldType(fieldName).get() + ".values()[0]";
+                String statementStr = String.format(SET_PROPERTIES_TEMPLATE, focusBeanDefinition.variableName, fieldName, mock);
+                statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
             } else {
-                String statementStr = String.format(SET_PROPERTIES_TEMPLATE, focusBeanDefinition.variableName, fieldName, type);
+                String statementStr = String.format(SET_PROPERTIES_TEMPLATE, focusBeanDefinition.variableName, fieldName, mockValue(type));
                 statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
             }
         });
@@ -118,7 +112,31 @@ public class MockBeanGenerator extends AnAction {
         });
     }
 
-    public static String mockValue(String type) {
+    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory, String beanClassStr, String variableName, PsiElement methodBlock, List<PsiStatement> statements, int depth) {
+        PsiClass beanClass = javaPsiFacade.findClass(beanClassStr, GlobalSearchScope.allScope(project));
+        if (beanClass == null) {
+            return;
+        }
+        BeanDefinition beanDefinition = new BeanDefinition(beanClass, variableName);
+        beanDefinition.fields.forEach((fieldName, type) -> {
+            if (ClassUtils.isJavaBean(type)) {
+                String statementStr = String.format(JAVA_BEAN_TEMPLATE, variableName, fieldName, beanDefinition.getSimpleFieldType(fieldName).get());
+                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+                if (depth >= 2) {
+                    return;
+                }
+                beanDefinition.getFieldType(fieldName).ifPresent(_beanClassStr -> {
+                    String name = variableName + "." + fieldName;
+                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, methodBlock, statements, depth + 1);
+                });
+            } else {
+                String statementStr = String.format(SET_PROPERTIES_TEMPLATE, variableName, fieldName, mockValue(type));
+                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+            }
+        });
+    }
+
+    private String mockValue(String type) {
         if (ClassUtils.isDouble(type)) {
             double mock = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(0, 10)).setScale(2, RoundingMode.HALF_UP).doubleValue();
             return String.valueOf(mock);
@@ -127,18 +145,26 @@ public class MockBeanGenerator extends AnAction {
             return String.valueOf(mock);
         } else if (ClassUtils.isLong(type)) {
             long mock = ThreadLocalRandom.current().nextLong(0, 100);
-            return String.valueOf(mock);
+            return mock + "L";
         } else if (ClassUtils.isBigDecimal(type)) {
             int mock = ThreadLocalRandom.current().nextInt(0, 10);
-            return "new BigDecimal(" + mock + ");";
+            return "new BigDecimal(" + mock + ")";
         } else if (ClassUtils.isString(type)) {
-            return "Mock";
+            return "\"" + RandomStringUtils.random(10, true, false) + "\"";
+        } else if (ClassUtils.isZonedDateTime(type)) {
+            return "ZonedDateTime.now()";
+        } else if (ClassUtils.isLocalDateTime(type)) {
+            return "LocalDateTime.now()";
+        } else if (ClassUtils.isLocalDate(type)) {
+            return "LocalDate.now()";
+        } else if (ClassUtils.isList(type)) {
+            return "List.of()";
+        } else if (ClassUtils.isSet(type)) {
+            return "Set.of()";
+        } else if (ClassUtils.isBoolean(type)) {
+            return ThreadLocalRandom.current().nextBoolean() ? "Boolean.TRUE" : "Boolean.FALSE";
         }
         return "null";
-    }
-
-    public static void main(String[] args) {
-        System.out.println(mockValue(Double.class.getName()));
     }
 
     private PsiElement findMethod(PsiElement statement) {
