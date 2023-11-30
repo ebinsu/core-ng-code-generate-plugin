@@ -106,7 +106,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                 statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
                 target.getFieldType(fieldName).ifPresent(beanClassStr -> {
                     String name = target.variableName + "." + fieldName;
-                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, methodBlock, statements);
+                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, methodBlock, statements, 0);
                 });
             } else {
                 String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
@@ -194,7 +194,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         });
     }
 
-    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory, String beanClassStr, String variableName, PsiElement methodBlock, List<PsiStatement> statements) {
+    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory, String beanClassStr, String variableName, PsiElement methodBlock, List<PsiStatement> statements, int depth) {
         PsiClass beanClass = javaPsiFacade.findClass(beanClassStr, GlobalSearchScope.allScope(project));
         if (beanClass == null) {
             return;
@@ -204,9 +204,12 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
             if (ClassUtils.isJavaBean(type)) {
                 String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, variableName, fieldName, beanDefinition.getSimpleFieldType(fieldName).get());
                 statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+                if (depth >= 2) {
+                    return;
+                }
                 beanDefinition.getFieldType(fieldName).ifPresent(_beanClassStr -> {
                     String name = variableName + "." + fieldName;
-                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, methodBlock, statements);
+                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, methodBlock, statements, depth + 1);
                 });
             } else {
                 String statementStr = String.format(NON_PROPERTIES_TEMPLATE, variableName, fieldName);
