@@ -14,10 +14,13 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +63,7 @@ public class UpdateDependenceVersion extends AnAction {
         if (StringUtils.isEmpty(inputText)) {
             return;
         }
-        Map<String, String> dependenceVersion = new HashMap<>();
+        Map<String, String> dependenceVersion = new LinkedHashMap<>();
         String[] inputLines = inputText.split("\n");
         for (String line : inputLines) {
             // kitchen-cooking-service-v2-interface : 2.0.0
@@ -80,6 +83,8 @@ public class UpdateDependenceVersion extends AnAction {
         if (dependenceVersion.isEmpty()) {
             return;
         }
+
+        Messages.showMessageDialog(inputVersion(dependenceVersion), "Input Version", Messages.getInformationIcon());
 
         //FROM buildFiles
         Map<String, String> variableDependence = new HashMap<>();
@@ -111,7 +116,9 @@ public class UpdateDependenceVersion extends AnAction {
             }
         }
 
+
         WriteCommandAction.runWriteCommandAction(project, () -> {
+            Map<String, List<Pair<String, String>>> changeHistories = new LinkedHashMap<>();
             //UPDATE build.gradle def
             for (Document doc : buildDoc) {
                 int lineCount = doc.getLineCount();
@@ -124,7 +131,10 @@ public class UpdateDependenceVersion extends AnAction {
                         String dependenceName = variableDependence.get(varName);
                         String version = dependenceVersion.get(dependenceName);
                         if (version != null) {
-                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(DEF_TPL, varName, version));
+                            String newDef = String.format(DEF_TPL, varName, version);
+                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), newDef);
+                            String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
+                            changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
                         }
                     }
                 }
@@ -140,18 +150,31 @@ public class UpdateDependenceVersion extends AnAction {
                         String dependenceName = variableDependence.get(varName);
                         String version = dependenceVersion.get(dependenceName);
                         if (version != null) {
+                            String newDef = String.format(GRADLE_TPL, varName, version);
                             doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(GRADLE_TPL, varName, version));
+                            String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
+                            changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
                         }
                     }
                 }
             }
 
-            Messages.showMessageDialog(inputVersion(dependenceVersion), "Input Version", Messages.getInformationIcon());
+            Messages.showMessageDialog(changeHistory(changeHistories), "Change Histories", Messages.getInformationIcon());
+
         });
 
     }
 
     private String inputVersion(Map<String, String> dependenceVersion) {
-        return dependenceVersion.entrySet().stream().map(m -> m.getKey() + ":" + m.getValue()).collect(Collectors.joining("\n"));
+        return dependenceVersion.entrySet().stream().map(m -> m.getKey() + " : " + m.getValue()).collect(Collectors.joining("\n"));
+    }
+
+    private String changeHistory(Map<String, List<Pair<String, String>>> changeHistories) {
+        if (changeHistories.isEmpty()) {
+            return "No changed!";
+        }
+        return changeHistories.entrySet().stream().map(m -> m.getKey() + " : \n" +
+                m.getValue().stream().map(x -> "--- " + x.getKey() + "\n" + "+++ " + x.getValue()).collect(Collectors.joining("\n"))
+        ).collect(Collectors.joining("\n"));
     }
 }
