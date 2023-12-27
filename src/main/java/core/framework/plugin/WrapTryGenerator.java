@@ -1,4 +1,4 @@
-package core.framework.plugin.mock;
+package core.framework.plugin;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.ASTNode;
