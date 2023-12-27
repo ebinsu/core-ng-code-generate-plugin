@@ -37,6 +37,7 @@ public class UpdateDependenceVersion extends AnAction {
     private static final Pattern VERSON_PATTERN = Pattern.compile("\\d.\\d.\\d");
     private static final String DEF_TPL = "def %1$s = '%2$s'";
     private static final String GRADLE_TPL = "%1$s=%2$s";
+    private static final String FORMAT = "\n************************************************\n";
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -45,12 +46,12 @@ public class UpdateDependenceVersion extends AnAction {
             return;
         }
         Collection<VirtualFile> buildFiles = FilenameIndex.getVirtualFilesByName(
-                "build.gradle",
-                GlobalSearchScope.FilesScope.allScope(project)
+            "build.gradle",
+            GlobalSearchScope.FilesScope.allScope(project)
         );
         Collection<VirtualFile> gradleFiles = FilenameIndex.getVirtualFilesByName(
-                "gradle.properties",
-                GlobalSearchScope.FilesScope.allScope(project)
+            "gradle.properties",
+            GlobalSearchScope.FilesScope.allScope(project)
         );
         FileDocumentManager documentManager = FileDocumentManager.getInstance();
         List<Document> buildDoc = buildFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
@@ -99,11 +100,11 @@ public class UpdateDependenceVersion extends AnAction {
                         String group = matcher.group();
                         String variable = group.replace("${", "").replace("}", "");
                         String dependenceName = text.replace("implementation", "")
-                                .replace("runtimeOnly", "")
-                                .replace("testRuntimeOnly", "")
-                                .replace(group, "")
-                                .replace("\"", "")
-                                .trim();
+                            .replace("runtimeOnly", "")
+                            .replace("testRuntimeOnly", "")
+                            .replace(group, "")
+                            .replace("\"", "")
+                            .trim();
                         if (dependenceName.endsWith(":")) {
                             dependenceName = dependenceName.substring(0, dependenceName.length() - 1);
                         }
@@ -116,9 +117,12 @@ public class UpdateDependenceVersion extends AnAction {
             }
         }
 
+        Map<String, List<Pair<String, String>>> changeHistories = previewChange(buildDoc, variableDependence, dependenceVersion, gradleDoc);
+        TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change Histories", "");
+        historyDialog.setInputText(changeHistory(changeHistories));
+        historyDialog.show();
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
-            Map<String, List<Pair<String, String>>> changeHistories = new LinkedHashMap<>();
             //UPDATE build.gradle def
             for (Document doc : buildDoc) {
                 int lineCount = doc.getLineCount();
@@ -131,10 +135,7 @@ public class UpdateDependenceVersion extends AnAction {
                         String dependenceName = variableDependence.get(varName);
                         String version = dependenceVersion.get(dependenceName);
                         if (version != null) {
-                            String newDef = String.format(DEF_TPL, varName, version);
-                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), newDef);
-                            String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
-                            changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
+                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(DEF_TPL, varName, version));
                         }
                     }
                 }
@@ -150,19 +151,54 @@ public class UpdateDependenceVersion extends AnAction {
                         String dependenceName = variableDependence.get(varName);
                         String version = dependenceVersion.get(dependenceName);
                         if (version != null) {
-                            String newDef = String.format(GRADLE_TPL, varName, version);
                             doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(GRADLE_TPL, varName, version));
-                            String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
-                            changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
                         }
                     }
                 }
             }
-
-            Messages.showMessageDialog(changeHistory(changeHistories), "Change Histories", Messages.getInformationIcon());
-
         });
+    }
 
+    private Map<String, List<Pair<String, String>>> previewChange(List<Document> buildDoc, Map<String, String> variableDependence, Map<String, String> dependenceVersion, List<Document> gradleDoc) {
+        Map<String, List<Pair<String, String>>> changeHistories = new LinkedHashMap<>();
+        //UPDATE build.gradle def
+        for (Document doc : buildDoc) {
+            int lineCount = doc.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                String text = doc.getText(textRange);
+                if (text.startsWith("def") && text.contains("=")) {
+                    String leftTxt = text.split("=")[0];
+                    String varName = leftTxt.replace("def", "").trim();
+                    String dependenceName = variableDependence.get(varName);
+                    String version = dependenceVersion.get(dependenceName);
+                    if (version != null) {
+                        String newDef = String.format(DEF_TPL, varName, version);
+                        String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
+                        changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
+                    }
+                }
+            }
+        }
+        //UPDATE gradle.properties
+        for (Document doc : gradleDoc) {
+            int lineCount = doc.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                String text = doc.getText(textRange);
+                if (!text.startsWith("#") && text.contains("=")) {
+                    String varName = text.split("=")[0].trim();
+                    String dependenceName = variableDependence.get(varName);
+                    String version = dependenceVersion.get(dependenceName);
+                    if (version != null) {
+                        String newDef = String.format(GRADLE_TPL, varName, version);
+                        String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
+                        changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
+                    }
+                }
+            }
+        }
+        return changeHistories;
     }
 
     private String inputVersion(Map<String, String> dependenceVersion) {
@@ -174,7 +210,7 @@ public class UpdateDependenceVersion extends AnAction {
             return "No changed!";
         }
         return changeHistories.entrySet().stream().map(m -> m.getKey() + " : \n" +
-                m.getValue().stream().map(x -> "--- " + x.getKey() + "\n" + "+++ " + x.getValue()).collect(Collectors.joining("\n"))
-        ).collect(Collectors.joining("\n"));
+            m.getValue().stream().map(x -> "--- " + x.getKey() + "\n" + "+++ " + x.getValue()).collect(Collectors.joining("\n\n", FORMAT, FORMAT))
+        ).collect(Collectors.joining("\n\n"));
     }
 }

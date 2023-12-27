@@ -34,4 +34,8 @@ public class TextAreaDialogWrapper extends DialogWrapper {
         this.inputText = textField.getText();
         super.doOKAction();
     }
+
+    public void setInputText(String text) {
+        this.textField.setText(text);
+    }
 }
