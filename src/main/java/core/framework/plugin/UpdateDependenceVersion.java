@@ -7,6 +7,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,7 +16,6 @@ import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +23,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author ebin
  */
 public class UpdateDependenceVersion extends AnAction {
     private static final Pattern PATTERN = Pattern.compile("\\$\\{.*}");
+    private static final Pattern INTERFACE_PATTERN = Pattern.compile("[^\\s:]+-[^\\s:]+");
+    private static final Pattern VERSON_PATTERN = Pattern.compile("\\d.\\d.\\d");
     private static final String DEF_TPL = "def %1$s = '%2$s'";
     private static final String GRADLE_TPL = "%1$s=%2$s";
 
@@ -39,12 +42,12 @@ public class UpdateDependenceVersion extends AnAction {
             return;
         }
         Collection<VirtualFile> buildFiles = FilenameIndex.getVirtualFilesByName(
-            "build.gradle",
-            GlobalSearchScope.FilesScope.allScope(project)
+                "build.gradle",
+                GlobalSearchScope.FilesScope.allScope(project)
         );
         Collection<VirtualFile> gradleFiles = FilenameIndex.getVirtualFilesByName(
-            "gradle.properties",
-            GlobalSearchScope.FilesScope.allScope(project)
+                "gradle.properties",
+                GlobalSearchScope.FilesScope.allScope(project)
         );
         FileDocumentManager documentManager = FileDocumentManager.getInstance();
         List<Document> buildDoc = buildFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
@@ -65,37 +68,12 @@ public class UpdateDependenceVersion extends AnAction {
             if (Strings.isEmpty(line)) {
                 continue;
             }
-            if (line.contains("breaking")) {
-                String[] split = line.split("breaking");
-                String dependenceName = split[0].trim();
-                if (dependenceName.contains(":")) {
-                    dependenceName = dependenceName.split(":")[1];
-                }
-                dependenceVersion.put(dependenceName, split[1].trim());
-            } else if (line.contains("minor")) {
-                String[] split = line.split("minor");
-                String dependenceName = split[0].trim();
-                if (dependenceName.contains(":")) {
-                    dependenceName = dependenceName.split(":")[1];
-                }
-                dependenceVersion.put(dependenceName, split[1].trim());
-            } else if (line.contains("none")) {
-                String[] split = line.split("none");
-                String dependenceName = split[0].trim();
-                if (dependenceName.contains(":")) {
-                    dependenceName = dependenceName.split(":")[1];
-                }
-                dependenceVersion.put(dependenceName, split[1].trim());
-            } else if (line.contains(":")) {
-                int indexOf = line.indexOf(":");
-                int lastIndexOf = line.lastIndexOf(":");
-                String[] split = line.split(":");
-                if (indexOf == lastIndexOf) {
-                    // only one :
-                    dependenceVersion.put(split[0].trim(), split[1].trim());
-                } else {
-                    dependenceVersion.put(split[split.length - 2].trim(), split[split.length - 1].trim());
-                }
+            Matcher dependenceNameMatcher = INTERFACE_PATTERN.matcher(line);
+            Matcher versionMatcher = VERSON_PATTERN.matcher(line);
+            if (dependenceNameMatcher.find() && versionMatcher.find()) {
+                String dependenceName = dependenceNameMatcher.group();
+                String version = versionMatcher.group();
+                dependenceVersion.put(dependenceName.trim(), version.trim());
             }
         }
 
@@ -116,11 +94,11 @@ public class UpdateDependenceVersion extends AnAction {
                         String group = matcher.group();
                         String variable = group.replace("${", "").replace("}", "");
                         String dependenceName = text.replace("implementation", "")
-                            .replace("runtimeOnly", "")
-                            .replace("testRuntimeOnly", "")
-                            .replace(group, "")
-                            .replace("\"", "")
-                            .trim();
+                                .replace("runtimeOnly", "")
+                                .replace("testRuntimeOnly", "")
+                                .replace(group, "")
+                                .replace("\"", "")
+                                .trim();
                         if (dependenceName.endsWith(":")) {
                             dependenceName = dependenceName.substring(0, dependenceName.length() - 1);
                         }
@@ -167,7 +145,13 @@ public class UpdateDependenceVersion extends AnAction {
                     }
                 }
             }
+
+            Messages.showMessageDialog(inputVersion(dependenceVersion), "Input Version", Messages.getInformationIcon());
         });
 
+    }
+
+    private String inputVersion(Map<String, String> dependenceVersion) {
+        return dependenceVersion.entrySet().stream().map(m -> m.getKey() + ":" + m.getValue()).collect(Collectors.joining("\n"));
     }
 }
