@@ -29,8 +29,8 @@
                 text="Set Properties" description="Set bean properties">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
         </action>
-        <action id="MockBeanPropertiesGenerator" class="core.framework.plugin.mock.MockBeanGenerator"
-                text="Mock Pojo Value" description="Mock pojo value">
+        <action id="MockBeanPropertiesGenerator" class="core.framework.plugin.mock.WrapTryGenerator"
+                text="Wrap Try-Catch" description="Wrap try catch">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
 
