@@ -26,7 +26,8 @@ intellij {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>添加pojo赋mock值</li>
+         <li>Wrap try catch</li>
+         <li>Improved the upgrade dependent version action</li>
        </ul>
       """
 }
