@@ -1,13 +1,10 @@
 package core.framework.plugin.properties;
 
-import com.intellij.ide.highlighter.JavaFileType;
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
+import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.lang.ASTNode;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.ListPopup;
@@ -18,10 +15,12 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLocalVariable;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.IncorrectOperationException;
 import core.framework.plugin.utils.PsiUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,36 +30,11 @@ import java.util.List;
 /**
  * @author ebin
  */
-@Deprecated
-public class SetBeanPropertiesGenerator extends AnAction {
-
+public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAction implements IntentionAction {
     @Override
-    public void actionPerformed(AnActionEvent e) {
-        Project project = e.getData(PlatformDataKeys.PROJECT);
-        PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
-        if (project == null || psiFile == null) {
-            return;
-        }
-        FileType fileType = psiFile.getFileType();
-        if (!(fileType instanceof JavaFileType)) {
-            return;
-        }
-        Editor editor = e.getData(PlatformDataKeys.EDITOR);
-        if (editor == null) {
-            return;
-        }
-        PsiElement element = psiFile.findElementAt(editor.getCaretModel().getOffset());
-        if (element == null) {
-            return;
-        }
-        PsiElement maybeLocalVariable = element.getParent();
-        if (!(maybeLocalVariable instanceof PsiLocalVariable focusLocalVariable)) {
-            return;
-        }
+    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
+        PsiLocalVariable focusLocalVariable = (PsiLocalVariable) element.getParent();
         PsiType focusLocalVariableType = focusLocalVariable.getType();
-        if (!PsiUtils.isJavaBean(focusLocalVariableType)) {
-            return;
-        }
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
         PsiClass selectLocalVariableTypeClass = javaPsiFacade.findClass(
             focusLocalVariableType.getCanonicalText(),
@@ -83,10 +57,30 @@ public class SetBeanPropertiesGenerator extends AnAction {
         List<String> alreadyAssignedFiledNames = new ArrayList<>();
         findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
         findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable, alreadyAssignedFiledNames);
-
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(editor.getVirtualFile());
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
         ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, method, statement, focusBeanDefinition, alreadyAssignedFiledNames));
-        listPopup.showInBestPositionFor(e.getDataContext());
+        listPopup.showInBestPositionFor(editor);
+    }
+
+    @Override
+    public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
+        PsiElement maybeLocalVariable = element.getParent();
+        if (!(maybeLocalVariable instanceof PsiLocalVariable focusLocalVariable)) {
+            return false;
+        }
+        PsiType focusLocalVariableType = focusLocalVariable.getType();
+        return PsiUtils.isJavaBean(focusLocalVariableType);
+    }
+
+    @Override
+    public @NotNull @IntentionFamilyName String getFamilyName() {
+        return "# Populate properties";
+    }
+
+    @NotNull
+    public String getText() {
+        return getFamilyName();
     }
 
     private PsiElement findMethod(PsiElement statement) {
@@ -94,6 +88,9 @@ public class SetBeanPropertiesGenerator extends AnAction {
         boolean isMethod;
         do {
             maybeMethod = maybeMethod.getParent();
+            if (maybeMethod == null) {
+                break;
+            }
             if (maybeMethod instanceof ASTNode) {
                 isMethod = "METHOD".equals(((ASTNode) maybeMethod).getElementType().toString());
             } else {

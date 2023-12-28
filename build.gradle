@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'core.framework'
-version '1.0.3'
+version '1.0.4'
 
 repositories {
     mavenCentral()
@@ -26,8 +26,9 @@ intellij {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>Wrap try catch</li>
-         <li>Improved the upgrade dependent version action</li>
+         <li>Move populate bean properties AnAction to IntentionAction</li>
+         <li>Move wrap try catch AnAction to IntentionAction</li>
+         <li>Move copy env properties AnAction to IntentionAction</li>
        </ul>
       """
 }

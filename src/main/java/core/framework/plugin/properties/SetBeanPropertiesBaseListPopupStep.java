@@ -89,7 +89,10 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         WriteCommandAction.runWriteCommandAction(project, () -> {
             Collections.reverse(statements);
             for (PsiStatement addStatement : statements) {
-                methodBlock.addAfter(addStatement, statement);
+                try {
+                    methodBlock.addAfter(addStatement, statement);
+                } catch (Exception ignore) {
+                }
             }
         });
     }

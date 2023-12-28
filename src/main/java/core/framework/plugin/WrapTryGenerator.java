@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author ebin
  */
+@Deprecated
 public class WrapTryGenerator extends AnAction {
     public static final String TEMPLATE = """
             try {

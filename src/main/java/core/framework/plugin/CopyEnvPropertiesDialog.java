@@ -1,78 +1,40 @@
 package core.framework.plugin;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * @author ebin
  */
-@Deprecated
-public class AddEnvProperties extends AnAction {
-    private static String LOCAL_ENV_PATH = "/src/main/resources";
+public class CopyEnvPropertiesDialog extends CheckBoxDialogWrapper {
+    private static final String LOCAL_ENV_PATH = "/src/main/resources";
+    public String currentFilePath;
+    public Project project;
+
+    public CopyEnvPropertiesDialog(List<String> selections, String currentFilePath, Project project) {
+        super("Select Properties", selections);
+        this.currentFilePath = currentFilePath;
+        this.project = project;
+    }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        Project project = e.getData(PlatformDataKeys.PROJECT);
-        VirtualFile virtualFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
-        if (project == null || virtualFile == null) {
-            return;
-        }
-        String filename = virtualFile.getName();
-        if (!isPropertiesFile(filename)) {
-            return;
-        }
-        String currentFilePath = virtualFile.getPath();
-        if (!isEnvFile(currentFilePath)) {
-            return;
-        }
+    protected void doOKAction() {
         FileDocumentManager documentManager = FileDocumentManager.getInstance();
-        Document doc = documentManager.getDocument(virtualFile);
-        if (doc == null) {
-            return;
-        }
-
-        InputDialogWrapper dialog = new InputDialogWrapper("Input properties", "");
-        dialog.show();
-        String inputText = dialog.inputText;
-        if (StringUtils.isEmpty(inputText)) {
-            return;
-        }
-        if (!availableInput(inputText)) {
-            Messages.showMessageDialog("Invalid properties", "Error", Messages.getInformationIcon());
-        }
-        String[] split = inputText.split("=");
-        if (split.length < 2) {
-            Messages.showMessageDialog("Invalid properties", "Error", Messages.getInformationIcon());
-        }
-        String key = split[0].trim();
-        String value = split[1].trim();
-
-        PsiFile file = PsiManager.getInstance(project).findFile(virtualFile);
-        if (file == null) {
-            return;
-        }
-
+        VirtualFile virtualFile = getVirtualFile(documentManager, currentFilePath);
+        String filename = virtualFile.getName();
+        String currentFilePath = virtualFile.getPath();
         String localPath;
         String devPath;
         String uatPath;
@@ -103,11 +65,22 @@ public class AddEnvProperties extends AnAction {
             uatPath = servicePath + "/conf/uat/resources";
             prodPath = servicePath + "/conf/prod/resources";
         }
-
         Document localDoc = getDoc(documentManager, localPath);
         Document devDoc = getDoc(documentManager, devPath);
         Document uatDoc = getDoc(documentManager, uatPath);
         Document prodDoc = getDoc(documentManager, prodPath);
+
+        Properties toBeCopy = new Properties(selects.size());
+        selects.forEach(index -> {
+            String o = selections.get(index);
+            String[] split = o.split("=");
+            String key = split[0].trim();
+            String value = split[1].trim();
+            toBeCopy.put(key, value);
+        });
+        if (toBeCopy.isEmpty()) {
+            return;
+        }
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
             if (localDoc != null) {
@@ -117,12 +90,11 @@ public class AddEnvProperties extends AnAction {
                     properties.load(new StringReader(propertiesText));
                 } catch (IOException ignored) {
                 }
-                properties.put(key, value);
+                properties.putAll(toBeCopy);
                 Map<String, String> result = new LinkedHashMap<>();
                 properties.keySet().stream().sorted().forEach(k -> result.put((String) k, (String) properties.get(k)));
                 StringBuilder sb = new StringBuilder();
                 result.forEach((k, v) -> sb.append(k).append('=').append(v).append('\n'));
-
                 localDoc.replaceString(0, localDoc.getTextLength(), sb.toString());
             }
             if (devDoc != null) {
@@ -132,11 +104,13 @@ public class AddEnvProperties extends AnAction {
                     properties.load(new StringReader(propertiesText));
                 } catch (IOException ignored) {
                 }
-                String nv = value;
-                if (value.contains("uat") || value.contains("prod")) {
-                    nv = value.replace("uat", "dev").replace("prod", "dev");
-                }
-                properties.put(key, nv);
+                toBeCopy.forEach((k, v) -> {
+                    String nv = v.toString();
+                    if (nv.contains("uat") || nv.contains("prod")) {
+                        nv = nv.replace("uat", "dev").replace("prod", "dev");
+                    }
+                    properties.put(k, nv);
+                });
                 Map<String, String> result = new LinkedHashMap<>();
                 properties.keySet().stream().sorted().forEach(k -> result.put((String) k, (String) properties.get(k)));
                 StringBuilder sb = new StringBuilder();
@@ -151,11 +125,13 @@ public class AddEnvProperties extends AnAction {
                     properties.load(new StringReader(propertiesText));
                 } catch (IOException ignored) {
                 }
-                String nv = value;
-                if (value.contains("dev") || value.contains("prod")) {
-                    nv = value.replace("dev", "uat").replace("prod", "uat");
-                }
-                properties.put(key, nv);
+                toBeCopy.forEach((k, v) -> {
+                    String nv = v.toString();
+                    if (nv.contains("dev") || nv.contains("prod")) {
+                        nv = nv.replace("dev", "uat").replace("prod", "uat");
+                    }
+                    properties.put(k, nv);
+                });
                 Map<String, String> result = new LinkedHashMap<>();
                 properties.keySet().stream().sorted().forEach(k -> result.put((String) k, (String) properties.get(k)));
                 StringBuilder sb = new StringBuilder();
@@ -170,11 +146,13 @@ public class AddEnvProperties extends AnAction {
                     properties.load(new StringReader(propertiesText));
                 } catch (IOException ignored) {
                 }
-                String nv = value;
-                if (value.contains("dev") || value.contains("uat")) {
-                    nv = value.replace("dev", "prod").replace("uat", "prod");
-                }
-                properties.put(key, nv);
+                toBeCopy.forEach((k, v) -> {
+                    String nv = v.toString();
+                    if (nv.contains("dev") || nv.contains("uat")) {
+                        nv = nv.replace("dev", "prod").replace("uat", "prod");
+                    }
+                    properties.put(k, nv);
+                });
                 Map<String, String> result = new LinkedHashMap<>();
                 properties.keySet().stream().sorted().forEach(k -> result.put((String) k, (String) properties.get(k)));
                 StringBuilder sb = new StringBuilder();
@@ -183,6 +161,11 @@ public class AddEnvProperties extends AnAction {
                 prodDoc.replaceString(0, prodDoc.getTextLength(), sb.toString());
             }
         });
+        super.doOKAction();
+    }
+
+    private VirtualFile getVirtualFile(FileDocumentManager documentManager, String path) {
+        return VfsUtil.findFileByIoFile(new File(path), true);
     }
 
     private Document getDoc(FileDocumentManager documentManager, String path) {
@@ -192,25 +175,5 @@ public class AddEnvProperties extends AnAction {
             doc = documentManager.getDocument(localFile);
         }
         return doc;
-    }
-
-    private boolean availableInput(String inputText) {
-        if (Strings.isEmpty(inputText)) {
-            return false;
-        } else {
-            return inputText.contains("=");
-        }
-    }
-
-    private boolean isEnvFile(String path) {
-        if (path.contains(LOCAL_ENV_PATH)) {
-            return true;
-        } else
-            return path.contains("/resources") && (path.contains("dev") || path.contains("uat") || path.contains("prod"));
-    }
-
-    private boolean isPropertiesFile(String name) {
-        String extension = FilenameUtils.getExtension(name);
-        return extension.equals("properties");
     }
 }
