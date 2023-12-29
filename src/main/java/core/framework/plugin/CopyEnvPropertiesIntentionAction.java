@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.testFramework.LightVirtualFile;
@@ -17,7 +16,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -121,17 +119,9 @@ public class CopyEnvPropertiesIntentionAction extends PsiElementBaseIntentionAct
             return path.contains("/resources") && (path.contains("dev") || path.contains("uat") || path.contains("prod"));
     }
 
-    private Document getDoc(FileDocumentManager documentManager, String path) {
-        Document doc = null;
-        VirtualFile localFile = VfsUtil.findFileByIoFile(new File(path), true);
-        if (localFile != null) {
-            doc = documentManager.getDocument(localFile);
-        }
-        return doc;
-    }
-
     @Override
     public boolean startInWriteAction() {
         return false;
     }
+
 }

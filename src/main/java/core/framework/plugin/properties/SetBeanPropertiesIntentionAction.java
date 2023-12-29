@@ -5,9 +5,11 @@ import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.ListPopup;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiAssignmentExpression;
@@ -20,6 +22,7 @@ import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.IncorrectOperationException;
 import core.framework.plugin.utils.PsiUtils;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +36,11 @@ import java.util.List;
 public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAction implements IntentionAction {
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
+        FileDocumentManager documentManager = FileDocumentManager.getInstance();
+        VirtualFile virtualFile = getVirtualFile(editor, documentManager);
+        if (virtualFile == null) {
+            return;
+        }
         PsiLocalVariable focusLocalVariable = (PsiLocalVariable) element.getParent();
         PsiType focusLocalVariableType = focusLocalVariable.getType();
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
@@ -57,7 +65,7 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
         List<String> alreadyAssignedFiledNames = new ArrayList<>();
         findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
         findMethodBodyVariable(project, javaPsiFacade, method, focusLocalVariable, methodAllVariable, alreadyAssignedFiledNames);
-        PsiFile psiFile = PsiManager.getInstance(project).findFile(editor.getVirtualFile());
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
         ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, method, statement, focusBeanDefinition, alreadyAssignedFiledNames));
         listPopup.showInBestPositionFor(editor);
@@ -75,7 +83,7 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "# Populate properties";
+        return "#Populate properties";
     }
 
     @NotNull
@@ -148,5 +156,19 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
                 }
             }
         }
+    }
+
+    private VirtualFile getVirtualFile(Editor editor, FileDocumentManager documentManager) {
+        VirtualFile virtualFile = documentManager.getFile(editor.getDocument());
+        if (virtualFile instanceof LightVirtualFile lightVirtualFile) {
+            return lightVirtualFile.getOriginalFile();
+        } else {
+            return virtualFile;
+        }
+    }
+
+    @Override
+    public boolean startInWriteAction() {
+        return false;
     }
 }
