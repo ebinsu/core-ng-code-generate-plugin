@@ -13,6 +13,7 @@ import java.awt.*;
 public class TextAreaDialogWrapper extends DialogWrapper {
     JBTextArea textField;
     public String inputText;
+    public boolean cancel;
 
     public TextAreaDialogWrapper(String title, String defaultName) {
         super(true); // use current window as parent
@@ -37,5 +38,11 @@ public class TextAreaDialogWrapper extends DialogWrapper {
 
     public void setInputText(String text) {
         this.textField.setText(text);
+    }
+
+    @Override
+    public void doCancelAction() {
+        this.cancel = true;
+        super.doCancelAction();
     }
 }

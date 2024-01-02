@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class UpdateDependenceVersion extends AnAction {
     private static final Pattern PATTERN = Pattern.compile("\\$\\{.*}");
     private static final Pattern INTERFACE_PATTERN = Pattern.compile("[^\\s:]+-[^\\s:]+");
-    private static final Pattern VERSON_PATTERN = Pattern.compile("\\d.\\d.\\d");
+    private static final Pattern VERSON_PATTERN = Pattern.compile("\\d+.\\d+.\\d+");
     private static final String DEF_TPL = "def %1$s = '%2$s'";
     private static final String GRADLE_TPL = "%1$s=%2$s";
     private static final String FORMAT = "\n************************************************\n";
@@ -61,7 +61,7 @@ public class UpdateDependenceVersion extends AnAction {
         TextAreaDialogWrapper dialog = new TextAreaDialogWrapper("Input Dependence:Version", "");
         dialog.show();
         String inputText = dialog.inputText;
-        if (StringUtils.isEmpty(inputText)) {
+        if (dialog.cancel || StringUtils.isEmpty(inputText)) {
             return;
         }
         Map<String, String> dependenceVersion = new LinkedHashMap<>();
@@ -121,6 +121,10 @@ public class UpdateDependenceVersion extends AnAction {
         TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change Histories", "");
         historyDialog.setInputText(changeHistory(changeHistories));
         historyDialog.show();
+
+        if (historyDialog.cancel) {
+            return;
+        }
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
             //UPDATE build.gradle def
