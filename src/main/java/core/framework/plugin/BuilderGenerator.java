@@ -20,6 +20,7 @@ import com.intellij.psi.impl.source.PsiJavaFileImpl;
 /**
  * @author ebin
  */
+@Deprecated
 public class BuilderGenerator extends AnAction {
     public static final String MAIN_CLASS_CONSTRUCTOR_TEMPLATE = "private %1$s(Builder builder) {}";
     public static final String MAIN_CLASS_CONSTRUCTOR_BODY_TEMPLATE = "%1$s = builder.%1$s;";
