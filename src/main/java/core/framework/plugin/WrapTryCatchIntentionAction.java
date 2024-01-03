@@ -3,7 +3,6 @@ package core.framework.plugin;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
-import com.intellij.lang.ASTNode;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -15,6 +14,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.util.IncorrectOperationException;
+import core.framework.plugin.utils.PsiUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -82,8 +82,7 @@ public class WrapTryCatchIntentionAction extends PsiElementBaseIntentionAction i
         if (StringUtils.isEmpty(selectedText)) {
             return false;
         }
-        PsiElement method = findMethod(element);
-        return method != null;
+        return PsiUtils.findMethod(element).isPresent();
     }
 
     @Override
@@ -97,20 +96,4 @@ public class WrapTryCatchIntentionAction extends PsiElementBaseIntentionAction i
         return getFamilyName();
     }
 
-    private PsiElement findMethod(PsiElement statement) {
-        PsiElement maybeMethod = statement;
-        boolean isMethod;
-        do {
-            maybeMethod = maybeMethod.getParent();
-            if (maybeMethod == null) {
-                break;
-            }
-            if (maybeMethod instanceof ASTNode) {
-                isMethod = "METHOD".equals(((ASTNode) maybeMethod).getElementType().toString());
-            } else {
-                isMethod = true;
-            }
-        } while (!isMethod);
-        return maybeMethod;
-    }
 }

@@ -3,7 +3,6 @@ package core.framework.plugin.properties;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
-import com.intellij.lang.ASTNode;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
@@ -16,10 +15,8 @@ import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiLambdaExpression;
 import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiType;
@@ -31,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * @author ebin
@@ -60,7 +56,7 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
         }
 
         PsiElement statement = focusLocalVariable.getParent();
-        List<PsiElement> methods = findMethods(statement);
+        List<PsiElement> methods = PsiUtils.findMethods(statement);
         if (methods.isEmpty()) {
             return;
         }
@@ -94,27 +90,6 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
     @NotNull
     public String getText() {
         return getFamilyName();
-    }
-
-    private List<PsiElement> findMethods(PsiElement statement) {
-        List<PsiElement> methods = new ArrayList<>();
-        PsiElement maybeMethod = statement;
-        do {
-            maybeMethod = maybeMethod.getParent();
-            if (maybeMethod instanceof PsiMethod) {
-                methods.add(maybeMethod);
-                break;
-            } else if (maybeMethod instanceof ASTNode) {
-                String type = ((ASTNode) maybeMethod).getElementType().toString();
-                if ("METHOD".equals(type)) {
-                    methods.add(maybeMethod);
-                    break;
-                } else if ("EXPRESSION_LIST".equals(type)) {
-                    Stream.of(maybeMethod.getChildren()).filter(f -> f instanceof PsiLambdaExpression).findFirst().ifPresent(methods::add);
-                }
-            }
-        } while (maybeMethod.getParent() != null);
-        return methods;
     }
 
     private void findMethodBodyVariable(Project project, JavaPsiFacade javaPsiFacade, PsiElement method, PsiLocalVariable focusLocalVariable, List<BeanDefinition> methodAllVariable, List<String> alreadyAssignedFiledNames) {
