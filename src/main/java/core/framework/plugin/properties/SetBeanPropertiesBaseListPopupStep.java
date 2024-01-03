@@ -40,18 +40,16 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
 
     private final Project project;
     private final PsiFile psiFile;
-    private final PsiElement methodBlock;
     private final PsiElement statement;
     private final BeanDefinition target;
     private final JavaPsiFacade javaPsiFacade;
     private final List<String> alreadyAssignedFiledNames;
 
     public SetBeanPropertiesBaseListPopupStep(List<BeanDefinition> listValues, Project project, JavaPsiFacade javaPsiFacade, PsiFile psiFile,
-                                              PsiElement methodBlock, PsiElement statement, BeanDefinition target, List<String> alreadyAssignedFiledNames) {
+                                              PsiElement statement, BeanDefinition target, List<String> alreadyAssignedFiledNames) {
         this.project = project;
         this.javaPsiFacade = javaPsiFacade;
         this.psiFile = psiFile;
-        this.methodBlock = methodBlock;
         this.statement = statement;
         this.target = target;
         this.alreadyAssignedFiledNames = alreadyAssignedFiledNames;
@@ -106,7 +104,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                 statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
                 target.getFieldType(fieldName).ifPresent(beanClassStr -> {
                     String name = target.variableName + "." + fieldName;
-                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, methodBlock, statements, 0);
+                    expandJavaBean(project, javaPsiFacade, elementFactory, beanClassStr, name, statement.getContext(), statements, 0);
                 });
             } else {
                 String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
@@ -194,7 +192,9 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         });
     }
 
-    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory, String beanClassStr, String variableName, PsiElement methodBlock, List<PsiStatement> statements, int depth) {
+    private void expandJavaBean(Project project, JavaPsiFacade javaPsiFacade, PsiElementFactory elementFactory,
+                                String beanClassStr, String variableName, PsiElement context,
+                                List<PsiStatement> statements, int depth) {
         PsiClass beanClass = javaPsiFacade.findClass(beanClassStr, GlobalSearchScope.allScope(project));
         if (beanClass == null) {
             return;
@@ -203,17 +203,17 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         beanDefinition.fields.forEach((fieldName, type) -> {
             if (ClassUtils.isJavaBean(type)) {
                 String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE, variableName, fieldName, beanDefinition.getSimpleFieldType(fieldName).get());
-                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+                statements.add(elementFactory.createStatementFromText(statementStr, context));
                 if (depth >= 2) {
                     return;
                 }
                 beanDefinition.getFieldType(fieldName).ifPresent(_beanClassStr -> {
                     String name = variableName + "." + fieldName;
-                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, methodBlock, statements, depth + 1);
+                    expandJavaBean(project, javaPsiFacade, elementFactory, _beanClassStr, name, context, statements, depth + 1);
                 });
             } else {
                 String statementStr = String.format(NON_PROPERTIES_TEMPLATE, variableName, fieldName);
-                statements.add(elementFactory.createStatementFromText(statementStr, methodBlock.getContext()));
+                statements.add(elementFactory.createStatementFromText(statementStr, context));
             }
         });
     }
