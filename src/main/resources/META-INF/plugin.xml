@@ -19,7 +19,7 @@
                                         implementationClass="core.framework.plugin.sql.DomainToSqlLineMarkerProvider"/>
         <intentionAction>
             <language>JAVA</language>
-            <className>core.framework.plugin.generator.properties.SetBeanPropertiesIntentionAction</className>
+            <className>core.framework.plugin.generator.bean.SetBeanPropertiesIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>
@@ -47,7 +47,7 @@
 
         <intentionAction>
             <language>Properties</language>
-            <className>core.framework.plugin.CopyEnvPropertiesIntentionAction</className>
+            <className>core.framework.plugin.generator.properties.CopyEnvPropertiesIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>

@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.psi.PsiType;
-import core.framework.plugin.generator.properties.BeanDefinition;
+import core.framework.plugin.generator.bean.BeanDefinition;
 import org.jetbrains.annotations.NotNull;
 
 /**

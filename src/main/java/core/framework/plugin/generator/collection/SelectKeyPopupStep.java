@@ -8,8 +8,8 @@ import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiType;
-import core.framework.plugin.generator.properties.BeanDefinition;
-import core.framework.plugin.generator.properties.BeanField;
+import core.framework.plugin.generator.bean.BeanDefinition;
+import core.framework.plugin.generator.bean.BeanField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

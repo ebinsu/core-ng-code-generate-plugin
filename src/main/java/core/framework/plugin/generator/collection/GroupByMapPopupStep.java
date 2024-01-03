@@ -3,7 +3,7 @@ package core.framework.plugin.generator.collection;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiType;
-import core.framework.plugin.generator.properties.BeanDefinition;
+import core.framework.plugin.generator.bean.BeanDefinition;
 import core.framework.plugin.utils.ClassUtils;
 
 /**

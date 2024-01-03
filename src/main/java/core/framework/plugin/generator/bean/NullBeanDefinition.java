@@ -1,4 +1,4 @@
-package core.framework.plugin.generator.properties;
+package core.framework.plugin.generator.bean;
 
 /**
  * @author ebin

@@ -15,7 +15,7 @@ import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.IncorrectOperationException;
-import core.framework.plugin.generator.properties.BeanDefinition;
+import core.framework.plugin.generator.bean.BeanDefinition;
 import core.framework.plugin.utils.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 
