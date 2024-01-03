@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * @author ebin
@@ -23,6 +24,7 @@ public final class ClassUtils {
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getCanonicalName();
     public static final String LOCAL_DATE = LocalDate.class.getCanonicalName();
     public static final String BIG_DECIMAL = BigDecimal.class.getCanonicalName();
+    public static final String STREAM = Stream.class.getCanonicalName();
 
     public static final String APP_CLASS = "app.";
 
@@ -75,6 +77,10 @@ public final class ClassUtils {
 
     public static boolean isSet(String type) {
         return type.contains(SET_CLASS);
+    }
+
+    public static boolean isStream(String type) {
+        return type.contains(STREAM);
     }
 
     public static boolean isJavaBean(String type) {

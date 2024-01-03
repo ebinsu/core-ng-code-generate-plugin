@@ -1,4 +1,4 @@
-package core.framework.plugin.properties;
+package core.framework.plugin.generator.properties;
 
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;

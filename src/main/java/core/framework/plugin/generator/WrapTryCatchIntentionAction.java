@@ -1,4 +1,4 @@
-package core.framework.plugin;
+package core.framework.plugin.generator;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;

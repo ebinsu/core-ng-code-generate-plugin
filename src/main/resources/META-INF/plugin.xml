@@ -19,14 +19,28 @@
                                         implementationClass="core.framework.plugin.sql.DomainToSqlLineMarkerProvider"/>
         <intentionAction>
             <language>JAVA</language>
-            <className>core.framework.plugin.properties.SetBeanPropertiesIntentionAction</className>
+            <className>core.framework.plugin.generator.properties.SetBeanPropertiesIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>
 
         <intentionAction>
             <language>JAVA</language>
-            <className>core.framework.plugin.WrapTryCatchIntentionAction</className>
+            <className>core.framework.plugin.generator.WrapTryCatchIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
+            <className>core.framework.plugin.generator.collection.GroupByMapIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
+            <className>core.framework.plugin.generator.collection.CollectToMapIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>

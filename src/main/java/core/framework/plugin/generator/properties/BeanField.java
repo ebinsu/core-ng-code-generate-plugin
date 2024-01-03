@@ -1,4 +1,4 @@
-package core.framework.plugin.properties;
+package core.framework.plugin.generator.properties;
 
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
@@ -27,5 +27,9 @@ public class BeanField {
         this.simpleTypeName = type.getPresentableText();
         this.nullable = Arrays.stream(field.getAnnotations()).noneMatch(ann -> ann.getText().contains("NotNull"));
         this.name = field.getName();
+    }
+
+    public String getDisplayName() {
+        return simpleTypeName + " " + name;
     }
 }
