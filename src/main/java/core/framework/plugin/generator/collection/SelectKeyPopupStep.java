@@ -10,6 +10,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiType;
 import core.framework.plugin.generator.bean.BeanDefinition;
 import core.framework.plugin.generator.bean.BeanField;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,9 +45,12 @@ public abstract class SelectKeyPopupStep extends BaseListPopupStep<BeanField> {
         int lineNumber = document.getLineNumber(editor.getSelectionModel().getSelectionStart());
         int startOffset = document.getLineStartOffset(lineNumber);
         int endOffset = document.getLineEndOffset(lineNumber);
-        String line = editor.getDocument().getText(new TextRange(startOffset, endOffset)).replaceFirst("(?s)" + variableName + "(?!.*?" + variableName + ")", format);
+        String escapeExprSpecialWord = escapeExprSpecialWord(variableName);
+        String line = editor.getDocument().getText(new TextRange(startOffset, endOffset)).replaceFirst("(?s)" + escapeExprSpecialWord + "(?!.*?" + escapeExprSpecialWord + ")", format);
         if (line.endsWith("()")) {
             line = line.substring(0, line.length() - 2);
+        } else if (line.endsWith("();")) {
+            line = line.substring(0, line.length() - 3);
         }
         String finalLine = line;
         WriteCommandAction.runWriteCommandAction(project, () -> document.replaceString(
@@ -56,6 +60,18 @@ public abstract class SelectKeyPopupStep extends BaseListPopupStep<BeanField> {
         ));
 
         return super.onChosen(selectedValue, finalChoice);
+    }
+
+    public String escapeExprSpecialWord(String keyword) {
+        if (StringUtils.isNotBlank(keyword)) {
+            String[] fbsArr = {"\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|"};
+            for (String key : fbsArr) {
+                if (keyword.contains(key)) {
+                    keyword = keyword.replace(key, "\\" + key);
+                }
+            }
+        }
+        return keyword;
     }
 
     public abstract String getTemplate();

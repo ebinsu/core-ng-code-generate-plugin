@@ -101,7 +101,7 @@ public class AddIndex extends AnAction {
             }
         }).collect(Collectors.joining(","));
         String indexSeg = String.format(ADD_INDEX_TPL, tableName, indexName, indexDetail);
-        String indexDef = String.format(INDEX_DEF, tableName, indexDetail);
+        String indexDef = String.format(INDEX_DEF, indexName, indexDetail);
         int tableDefEndLine = findLine(sqlDoc, "InnoDB;");
         int line = findLastNonEmptyLine(sqlDoc, tableDefEndLine);
 
