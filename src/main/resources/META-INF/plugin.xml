@@ -71,6 +71,12 @@
                 icon="AllIcons.Providers.Mysql">
             <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="Generate"/>
         </action>
+        <action id="SyncDomainToSqlGenerator2" class="core.framework.plugin.sql.SyncDomainToSqlGenerator"
+                text="Sync Column Form Domain" description="Sync domain to sql file"
+                icon="AllIcons.Providers.Mysql">
+            <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="Generate"/>
+        </action>
+
 
         <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">

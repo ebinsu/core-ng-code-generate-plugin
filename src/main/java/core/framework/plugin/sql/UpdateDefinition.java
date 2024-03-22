@@ -27,7 +27,11 @@ public class UpdateDefinition implements SqlDefinition {
 
     public String toAlertSql(String tableName) {
         String cname = columnName.replace(COLUMN_NAME_FLAG, "");
-        return String.format(template, tableName, cname, dateType, newConstraint);
+        String formatConstraint = newConstraint;
+        if (formatConstraint.contains("'")) {
+            formatConstraint = formatConstraint.replace("'", "\\'");
+        }
+        return String.format(template, tableName, cname, dateType, formatConstraint);
     }
 
     public String toColumnSql() {

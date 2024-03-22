@@ -49,7 +49,11 @@ public class AddDefinition implements SqlDefinition {
 
     public String toAlertSql(String tableName) {
         String cname = columnName.replace(COLUMN_NAME_FLAG, "");
-        return String.format(template, cname, tableName, dateType, constraint,
+        String formatConstraint = constraint;
+        if (formatConstraint.contains("'")) {
+            formatConstraint = formatConstraint.replace("'", "\\'");
+        }
+        return String.format(template, cname, tableName, dateType, formatConstraint,
             Optional.ofNullable(afterColumnName).map(name -> "AFTER " + name).orElse(""));
     }
 
