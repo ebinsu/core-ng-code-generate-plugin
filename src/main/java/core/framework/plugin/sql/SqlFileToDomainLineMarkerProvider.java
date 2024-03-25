@@ -21,6 +21,7 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.impl.JavaPsiFacadeImpl;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
+import com.intellij.psi.impl.source.PsiPlainTextFileImpl;
 import com.intellij.psi.impl.source.tree.java.PsiNameValuePairImpl;
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -43,6 +44,14 @@ public class SqlFileToDomainLineMarkerProvider extends RelatedItemLineMarkerProv
 
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
+        if (element.getParent() != null) {
+            PsiElement parent = element.getParent();
+            if (parent instanceof PsiPlainTextFileImpl file) {
+                if (!"sql".equals(file.getVirtualFile().getExtension())) {
+                    return;
+                }
+            }
+        }
         String fullText = element.getText();
         if (fullText.startsWith("CREATE TABLE") && element.getParent() != null) {
             Matcher matcher = PATTERN.matcher(fullText);
