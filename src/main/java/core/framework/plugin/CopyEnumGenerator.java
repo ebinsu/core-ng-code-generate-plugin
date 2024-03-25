@@ -164,6 +164,9 @@ public class CopyEnumGenerator extends AnAction {
             }
             if (testDirVF != null) {
                 VirtualFile enumTestVF = testDirVF.findChild("EnumTest.java");
+                if (enumTestVF == null) {
+                    enumTestVF = testDirVF.findChild("EnumTests.java");
+                }
                 String fullGenerateEnumName = generatePackageName + "." + generateEnumName;
                 String methodName = Arrays.stream(StringUtils.split(fullGenerateEnumName, ".")).map(StringUtils::capitalize).collect(Collectors.joining());
                 String fullSelectEnumName = selectEnumPackage + "." + selectEnumClass.getName();

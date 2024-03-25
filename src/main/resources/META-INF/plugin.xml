@@ -17,6 +17,8 @@
         <!-- Add your extensions here -->
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="core.framework.plugin.sql.DomainToSqlLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="TEXT"
+                                        implementationClass="core.framework.plugin.sql.SqlFileToDomainLineMarkerProvider"/>
         <intentionAction>
             <language>JAVA</language>
             <className>core.framework.plugin.generator.bean.SetBeanPropertiesIntentionAction</className>
