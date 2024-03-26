@@ -1,8 +1,7 @@
-package core.framework.plugin;
+package core.framework.plugin.generator.enums;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.util.TreeClassChooserFactory;
-import com.intellij.ide.util.TreeFileChooser;
 import com.intellij.ide.util.TreeFileChooserDialog;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -31,6 +30,7 @@ import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
+import core.framework.plugin.generator.InputDialogWrapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 

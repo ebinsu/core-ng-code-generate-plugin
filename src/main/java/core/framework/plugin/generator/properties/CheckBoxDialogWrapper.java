@@ -1,4 +1,4 @@
-package core.framework.plugin;
+package core.framework.plugin.generator.properties;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.CheckBoxList;

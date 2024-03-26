@@ -1,4 +1,4 @@
-package core.framework.plugin.generator;
+package core.framework.plugin.generator.trycatch;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;

@@ -1,4 +1,4 @@
-package core.framework.plugin;
+package core.framework.plugin.generator.properties;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -13,6 +13,7 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
+import core.framework.plugin.generator.InputDialogWrapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,7 @@ import java.util.Optional;
  * @author ebin
  */
 public class NewEnvPropertiesFile extends AnAction {
-    private static String LOCAL_ENV_PATH = "/src/main/resources";
+    private static final String LOCAL_ENV_PATH = "/src/main/resources";
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {

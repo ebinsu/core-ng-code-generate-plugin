@@ -6,7 +6,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import core.framework.plugin.CheckBoxDialogWrapper;
 
 import java.io.File;
 import java.io.IOException;

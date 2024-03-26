@@ -1,8 +1,7 @@
-package core.framework.plugin;
+package core.framework.plugin.generator;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.EditorTextField;
-import com.intellij.ui.components.JBTextArea;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,15 +9,22 @@ import java.awt.*;
 /**
  * @author ebin
  */
-public class TextAreaDialogWrapper extends DialogWrapper {
-    JBTextArea textField;
+public class InputDialogWrapper extends DialogWrapper {
+    EditorTextField textField;
     public String inputText;
-    public boolean cancel;
 
-    public TextAreaDialogWrapper(String title, String defaultName) {
+    public InputDialogWrapper(String defaultName) {
+        super(true); // use current window as parent
+        setTitle("Input");
+        textField = new EditorTextField(defaultName);
+        init();
+    }
+
+    public InputDialogWrapper(String title, String defaultName) {
         super(true); // use current window as parent
         setTitle(title);
-        textField = new JBTextArea(defaultName);
+        textField = new EditorTextField(defaultName);
+        textField.setPreferredWidth(800);
         init();
     }
 
@@ -26,7 +32,6 @@ public class TextAreaDialogWrapper extends DialogWrapper {
     protected JComponent createCenterPanel() {
         JPanel dialogPanel = new JPanel(new BorderLayout());
         dialogPanel.add(textField, BorderLayout.CENTER);
-        dialogPanel.setPreferredSize(new Dimension(800, 500));
         return dialogPanel;
     }
 
@@ -34,15 +39,5 @@ public class TextAreaDialogWrapper extends DialogWrapper {
     protected void doOKAction() {
         this.inputText = textField.getText();
         super.doOKAction();
-    }
-
-    public void setInputText(String text) {
-        this.textField.setText(text);
-    }
-
-    @Override
-    public void doCancelAction() {
-        this.cancel = true;
-        super.doCancelAction();
     }
 }

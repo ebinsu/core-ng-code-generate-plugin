@@ -28,7 +28,7 @@
 
         <intentionAction>
             <language>JAVA</language>
-            <className>core.framework.plugin.generator.WrapTryCatchIntentionAction</className>
+            <className>core.framework.plugin.generator.trycatch.WrapTryCatchIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>
@@ -80,17 +80,17 @@
         </action>
 
 
-        <action id="CopyEnumGenerator" class="core.framework.plugin.CopyEnumGenerator" text="Copy Enum"
+        <action id="CopyEnumGenerator" class="core.framework.plugin.generator.enums.CopyEnumGenerator" text="Copy Enum"
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
 
-        <action id="NewEnvPropertiesFile" class="core.framework.plugin.NewEnvPropertiesFile"
+        <action id="NewEnvPropertiesFile" class="core.framework.plugin.generator.properties.NewEnvPropertiesFile"
                 text="New Env Properties File"
                 description="NewEnvPropertiesFile" icon="AllIcons.Nodes.Property">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
-        <action id="UpdateDependenceVersion" class="core.framework.plugin.UpdateDependenceVersion"
+        <action id="UpdateDependenceVersion" class="core.framework.plugin.dependence.UpdateDependenceVersion"
                 text="Update Dependence Version" description="Update dependence version"
                 icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="VersionControlsGroup"/>

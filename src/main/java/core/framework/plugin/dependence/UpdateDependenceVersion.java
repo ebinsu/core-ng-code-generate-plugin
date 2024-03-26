@@ -1,4 +1,4 @@
-package core.framework.plugin;
+package core.framework.plugin.dependence;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
