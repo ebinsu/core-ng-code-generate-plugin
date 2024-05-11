@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'core.framework'
-version '1.1.1'
+version '1.1.2'
 
 repositories {
     mavenCentral()
@@ -26,8 +26,7 @@ intellij {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>SQL file navigate to domain file.</li>
-         <li>fix bugs</li>
+         <li>support core ng 3.0</li>
        </ul>
       """
 }

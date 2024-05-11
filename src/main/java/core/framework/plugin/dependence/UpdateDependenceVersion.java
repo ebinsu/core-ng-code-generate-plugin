@@ -32,10 +32,11 @@ import java.util.stream.Collectors;
  * @author ebin
  */
 public class UpdateDependenceVersion extends AnAction {
-    private static final Pattern PATTERN = Pattern.compile("\\$\\{.*}");
+    private static final Pattern PATTERN = Pattern.compile("(implementation|runtimeOnly|testRuntimeOnly)\\s*\\(\".*:(?<dependenceName>.*):\\$\\{(?<variable>.*)}");
+    private static final Pattern SETTINGS_GRADLE_PATTERN = Pattern.compile("library\\s*.*,\\s*\"(?<dependence>.*)\"");
     private static final Pattern INTERFACE_PATTERN = Pattern.compile("[^\\s:]+-[^\\s:]+");
     private static final Pattern VERSON_PATTERN = Pattern.compile("\\d+.\\d+.\\d+");
-    private static final String DEF_TPL = "def %1$s = '%2$s'";
+    private static final String DEF_TPL = "val %1$s = '%2$s'";
     private static final String GRADLE_TPL = "%1$s=%2$s";
     private static final String FORMAT = "\n************************************************\n";
 
@@ -46,16 +47,21 @@ public class UpdateDependenceVersion extends AnAction {
             return;
         }
         Collection<VirtualFile> buildFiles = FilenameIndex.getVirtualFilesByName(
-            "build.gradle",
+            "build.gradle.kts",
             GlobalSearchScope.FilesScope.allScope(project)
         );
         Collection<VirtualFile> gradleFiles = FilenameIndex.getVirtualFilesByName(
             "gradle.properties",
             GlobalSearchScope.FilesScope.allScope(project)
         );
+        Collection<VirtualFile> settingsGradleFiles = FilenameIndex.getVirtualFilesByName(
+            "settings.gradle.kts",
+            GlobalSearchScope.FilesScope.allScope(project)
+        );
         FileDocumentManager documentManager = FileDocumentManager.getInstance();
         List<Document> buildDoc = buildFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
         List<Document> gradleDoc = gradleFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
+        List<Document> settingsGradleDoc = settingsGradleFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
 
         //INPUT
         TextAreaDialogWrapper dialog = new TextAreaDialogWrapper("Input Dependence:Version", "");
@@ -94,30 +100,21 @@ public class UpdateDependenceVersion extends AnAction {
             for (int i = 0; i < lineCount; i++) {
                 TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
                 String text = doc.getText(textRange);
+                //  implementation("com.zendesk:sunshine-conversations-client:${sunshineConversationsVersion}")
                 if (text.contains("implementation") || text.contains("runtimeOnly") || text.contains("testRuntimeOnly")) {
                     Matcher matcher = PATTERN.matcher(text);
                     if (matcher.find()) {
-                        String group = matcher.group();
-                        String variable = group.replace("${", "").replace("}", "");
-                        String dependenceName = text.replace("implementation", "")
-                            .replace("runtimeOnly", "")
-                            .replace("testRuntimeOnly", "")
-                            .replace(group, "")
-                            .replace("\"", "")
-                            .trim();
-                        if (dependenceName.endsWith(":")) {
-                            dependenceName = dependenceName.substring(0, dependenceName.length() - 1);
+                        String dependenceName = matcher.group("dependenceName");
+                        String variable = matcher.group("variable");
+                        if (StringUtils.isNotEmpty(dependenceName) && StringUtils.isNotEmpty(variable)) {
+                            variableDependence.put(variable, dependenceName);
                         }
-                        if (dependenceName.contains(":")) {
-                            dependenceName = dependenceName.split(":")[1];
-                        }
-                        variableDependence.put(variable, dependenceName);
                     }
                 }
             }
         }
 
-        Map<String, List<Pair<String, String>>> changeHistories = previewChange(buildDoc, variableDependence, dependenceVersion, gradleDoc);
+        Map<String, List<Pair<String, String>>> changeHistories = previewChange(buildDoc, variableDependence, dependenceVersion, gradleDoc, settingsGradleDoc);
         TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change Histories", "");
         historyDialog.setInputText(changeHistory(changeHistories));
         historyDialog.show();
@@ -133,9 +130,9 @@ public class UpdateDependenceVersion extends AnAction {
                 for (int i = 0; i < lineCount; i++) {
                     TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
                     String text = doc.getText(textRange);
-                    if (text.startsWith("def") && text.contains("=")) {
+                    if (text.startsWith("val") && text.contains("=")) {
                         String leftTxt = text.split("=")[0];
-                        String varName = leftTxt.replace("def", "").trim();
+                        String varName = leftTxt.replace("val", "").trim();
                         String dependenceName = variableDependence.get(varName);
                         String version = dependenceVersion.get(dependenceName);
                         if (version != null) {
@@ -160,10 +157,41 @@ public class UpdateDependenceVersion extends AnAction {
                     }
                 }
             }
+            //UPDATE settings.gradle.kts
+            for (Document doc : settingsGradleDoc) {
+                int lineCount = doc.getLineCount();
+                for (int i = 0; i < lineCount; i++) {
+                    TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                    String text = doc.getText(textRange);
+                    if (text.trim().startsWith("library")) {
+                        Matcher matcher = SETTINGS_GRADLE_PATTERN.matcher(text);
+                        if (matcher.find()) {
+                            String dependenceStr = matcher.group("dependence");
+                            if (StringUtils.isNotEmpty(dependenceStr)) {
+                                Matcher dependenceNameMatcher = INTERFACE_PATTERN.matcher(dependenceStr);
+                                Matcher versionMatcher = VERSON_PATTERN.matcher(dependenceStr);
+                                if (dependenceNameMatcher.find() && versionMatcher.find()) {
+                                    String dependenceName = dependenceNameMatcher.group();
+                                    String oldVersion = versionMatcher.group();
+                                    String version = dependenceVersion.get(dependenceName);
+                                    if (version != null && !version.equals(oldVersion)) {
+                                        String newText = text.replace(oldVersion, version);
+                                        doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), newText);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 
-    private Map<String, List<Pair<String, String>>> previewChange(List<Document> buildDoc, Map<String, String> variableDependence, Map<String, String> dependenceVersion, List<Document> gradleDoc) {
+    private Map<String, List<Pair<String, String>>> previewChange(List<Document> buildDoc,
+                                                                  Map<String, String> variableDependence,
+                                                                  Map<String, String> dependenceVersion,
+                                                                  List<Document> gradleDoc,
+                                                                  List<Document> settingsGradleDoc) {
         Map<String, List<Pair<String, String>>> changeHistories = new LinkedHashMap<>();
         //UPDATE build.gradle def
         for (Document doc : buildDoc) {
@@ -171,9 +199,9 @@ public class UpdateDependenceVersion extends AnAction {
             for (int i = 0; i < lineCount; i++) {
                 TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
                 String text = doc.getText(textRange);
-                if (text.startsWith("def") && text.contains("=")) {
+                if (text.startsWith("val") && text.contains("=")) {
                     String leftTxt = text.split("=")[0];
-                    String varName = leftTxt.replace("def", "").trim();
+                    String varName = leftTxt.replace("val", "").trim();
                     String dependenceName = variableDependence.get(varName);
                     String version = dependenceVersion.get(dependenceName);
                     if (version != null) {
@@ -202,6 +230,35 @@ public class UpdateDependenceVersion extends AnAction {
                 }
             }
         }
+
+        for (Document doc : settingsGradleDoc) {
+            int lineCount = doc.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                String text = doc.getText(textRange);
+                if (text.trim().startsWith("library")) {
+                    Matcher matcher = SETTINGS_GRADLE_PATTERN.matcher(text);
+                    if (matcher.find()) {
+                        String dependenceStr = matcher.group("dependence");
+                        if (StringUtils.isNotEmpty(dependenceStr)) {
+                            Matcher dependenceNameMatcher = INTERFACE_PATTERN.matcher(dependenceStr);
+                            Matcher versionMatcher = VERSON_PATTERN.matcher(dependenceStr);
+                            if (dependenceNameMatcher.find() && versionMatcher.find()) {
+                                String dependenceName = dependenceNameMatcher.group();
+                                String oldVersion = versionMatcher.group();
+                                String version = dependenceVersion.get(dependenceName);
+                                if (version != null && !version.equals(oldVersion)) {
+                                    String newText = text.replace(oldVersion, version);
+                                    String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
+                                    changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newText));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return changeHistories;
     }
 
