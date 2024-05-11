@@ -36,7 +36,7 @@ public class UpdateDependenceVersion extends AnAction {
     private static final Pattern SETTINGS_GRADLE_PATTERN = Pattern.compile("library\\s*.*,\\s*\"(?<dependence>.*)\"");
     private static final Pattern INTERFACE_PATTERN = Pattern.compile("[^\\s:]+-[^\\s:]+");
     private static final Pattern VERSON_PATTERN = Pattern.compile("\\d+.\\d+.\\d+");
-    private static final String DEF_TPL = "val %1$s = '%2$s'";
+    private static final String DEF_TPL = "val %1$s = \"%2$s\"";
     private static final String GRADLE_TPL = "%1$s=%2$s";
     private static final String FORMAT = "\n************************************************\n";
 

@@ -43,8 +43,8 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
                                 PsiAnnotationMemberValue value = pair.getValue();
                                 if (value instanceof PsiReferenceExpression referenceExpression) {
                                     PsiClass refClass = javaPsiFacade.findClass(
-                                            ((PsiReferenceExpressionImpl) referenceExpression.getFirstChild()).getCanonicalText(),
-                                            GlobalSearchScope.allScope(element.getProject())
+                                        ((PsiReferenceExpressionImpl) referenceExpression.getFirstChild()).getCanonicalText(),
+                                        GlobalSearchScope.allScope(element.getProject())
                                     );
                                     if (refClass != null) {
                                         PsiField fieldByName = refClass.findFieldByName(referenceExpression.getReferenceName(), true);
@@ -78,17 +78,17 @@ public class DomainToSqlLineMarkerProvider extends RelatedItemLineMarkerProvider
             path = path.substring(0, srcIndex);
             int lasted = path.lastIndexOf("/");
             path = path.substring(lasted + 1);
+            String finalPath = "/" + path + "-db-migration/";
 
-            String finalPath = path;
             VirtualFile virtualFile = files.stream().filter(f -> f.getPath().contains(finalPath)).findFirst().orElse(null);
             if (virtualFile == null) {
                 return;
             }
             PsiFile file = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
             NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.Providers.Mysql)
-                    .setAlignment(GutterIconRenderer.Alignment.CENTER)
-                    .setTargets(file)
-                    .setTooltipText("Navigate to " + virtualFile.getName());
+                .setAlignment(GutterIconRenderer.Alignment.CENTER)
+                .setTargets(file)
+                .setTooltipText("Navigate to " + virtualFile.getName());
             PsiElement nameIdentifier = owner.getNameIdentifier();
             if (nameIdentifier != null) {
                 result.add(builder.createLineMarkerInfo(nameIdentifier));

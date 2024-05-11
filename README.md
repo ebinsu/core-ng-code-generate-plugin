@@ -15,7 +15,8 @@ Generate code with core ng style
 ![doamin_to_sql.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/image/doamin_to_sql.gif)
 
 ## 5. 更新依赖版本
-![update_version.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/image/update_version.gif)
+![update_version.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/image/update_version_1.gif)
+![update_version.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/image/update_version_2.gif)
 
 ## 6. 复制枚举类并添加单元测试
 ![copy_enum.gif](https://raw.githubusercontent.com/ebinsu/core-ng-code-generate-plugin/master/image/copy_enum.gif)
