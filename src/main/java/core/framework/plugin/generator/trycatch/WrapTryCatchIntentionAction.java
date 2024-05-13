@@ -15,7 +15,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.util.IncorrectOperationException;
 import core.framework.plugin.utils.PsiUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**

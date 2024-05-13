@@ -3,7 +3,7 @@ package core.framework.plugin.generator.bean;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import core.framework.plugin.utils.PsiUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
