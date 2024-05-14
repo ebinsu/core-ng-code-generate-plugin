@@ -1,8 +1,7 @@
 package core.framework.plugin.sql;
 
-import com.intellij.ide.highlighter.JavaFileType;
+import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
-import com.intellij.ide.util.TreeFileChooser;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -17,7 +16,7 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
-import com.intellij.psi.impl.source.PsiJavaFileImpl;
+import com.intellij.psi.search.GlobalSearchScope;
 
 /**
  * @author ebin
@@ -34,17 +33,22 @@ public class DomainToSqlFileGenerator extends AnAction {
             virtualFile = virtualFile.getParent();
         }
         TreeClassChooserFactory instance = TreeClassChooserFactory.getInstance(project);
-        TreeFileChooser chooser = instance.createFileChooser("Choose Domain To Generate Sql File.", null, JavaFileType.INSTANCE, null, true, false);
+        TreeClassChooser chooser = instance.createNoInnerClassesScopeChooser("Choose Domain To Generate Sql File.",
+            GlobalSearchScope.projectScope(project),
+            aClass -> {
+                if (aClass.getQualifiedName() != null) {
+                    return aClass.getQualifiedName().contains("domain");
+                } else {
+                    return false;
+                }
+            },
+            null);
         chooser.showDialog();
-        PsiFile psiFile = chooser.getSelectedFile();
-        if (psiFile == null) {
+
+        PsiClass mainClass = chooser.getSelected();
+        if (mainClass == null) {
             return;
         }
-        PsiClass[] classes = ((PsiJavaFileImpl) psiFile).getClasses();
-        if (classes.length == 0) {
-            return;
-        }
-        PsiClass mainClass = classes[0];
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
         BeanDefinition beanDefinition = new BeanDefinition(javaPsiFacade, mainClass);
         if (beanDefinition.tableName == null

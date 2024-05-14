@@ -1,15 +1,13 @@
 package core.framework.plugin.generator.enums;
 
-import com.intellij.ide.highlighter.JavaFileType;
+import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
-import com.intellij.ide.util.TreeFileChooserDialog;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -24,12 +22,12 @@ import com.intellij.psi.PsiEnumConstant;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
+import com.intellij.psi.search.GlobalSearchScope;
 import core.framework.plugin.generator.InputDialogWrapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,26 +89,17 @@ public class CopyEnumGenerator extends AnAction {
         }
 
         TreeClassChooserFactory instance = TreeClassChooserFactory.getInstance(project);
-        TreeFileChooserDialog chooser = (TreeFileChooserDialog) instance.createFileChooser("Choose Enum Class", null,
-            JavaFileType.INSTANCE, file -> {
-                FileType fileType = file.getFileType();
-                if (fileType instanceof JavaFileType) {
-                    return Arrays.stream(((PsiJavaFile) file).getClasses()).anyMatch(PsiClass::isEnum);
-                }
-                return true;
-            }, true, true);
-        chooser.setSize(900, 400);
+
+        TreeClassChooser chooser = instance.createNoInnerClassesScopeChooser("Choose Enum Class",
+            GlobalSearchScope.allScope(project),
+            PsiClass::isEnum,
+            null);
         chooser.showDialog();
-        PsiFile selectPsiFile = chooser.getSelectedFile();
-        if (selectPsiFile == null) {
+        PsiClass selectEnumClass = chooser.getSelected();
+        if (selectEnumClass == null) {
             return;
         }
-        String selectEnumPackage = ((PsiJavaFileImpl) selectPsiFile).getPackageName();
-        PsiClass[] classes = ((PsiJavaFileImpl) selectPsiFile).getClasses();
-        if (classes.length == 0) {
-            return;
-        }
-        PsiClass selectEnumClass = classes[0];
+
 
         InputDialogWrapper dialog = new InputDialogWrapper(selectEnumClass.getName());
         dialog.show();
@@ -169,7 +158,7 @@ public class CopyEnumGenerator extends AnAction {
                 }
                 String fullGenerateEnumName = generatePackageName + "." + generateEnumName;
                 String methodName = Arrays.stream(StringUtils.split(fullGenerateEnumName, ".")).map(StringUtils::capitalize).collect(Collectors.joining());
-                String fullSelectEnumName = selectEnumPackage + "." + selectEnumClass.getName();
+                String fullSelectEnumName = selectEnumClass.getQualifiedName();
                 if (enumTestVF == null) {
                     PsiFile testClassFile = PsiFileFactory.getInstance(project).createFileFromText(JavaLanguage.INSTANCE,
                         String.format(TEST_CLASS_TEMPLATE, methodName, fullGenerateEnumName, fullSelectEnumName));

@@ -1,10 +1,9 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.17.3'
-    id 'java'
+    id "org.jetbrains.intellij" version "1.17.3"
 }
 
 group 'core.framework'
-version '1.2.0'
+version '1.2.1'
 
 repositories {
     mavenCentral()
@@ -26,7 +25,7 @@ intellij {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>support core ng 3.0</li>
+         <li>remove deprecated API usages</li>
        </ul>
       """
 }
