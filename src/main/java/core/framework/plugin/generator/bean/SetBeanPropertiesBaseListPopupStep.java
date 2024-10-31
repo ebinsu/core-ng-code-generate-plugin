@@ -132,7 +132,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
             if (selected.hasField(fieldName, beanField.typeName)) {
                 statement = String.format(COPY_TEMPLATE, target.variableName, fieldName, selectedVariableName, fieldName);
             } else {
-                Optional<String> selectedSimilarityFieldOptional = selected.getSimilarityField(fieldName, beanField.typeName);
+                Optional<String> selectedSimilarityFieldOptional = selected.getSimilarityField(fieldName);
                 if (selectedSimilarityFieldOptional.isPresent()) {
                     String selectedSimilarityField = selectedSimilarityFieldOptional.get();
                     Optional<String> fieldType = selected.getFieldType(selectedSimilarityField);

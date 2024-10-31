@@ -114,13 +114,14 @@ public abstract class AbstractMapIntentionAction extends PsiElementBaseIntention
                 Optional<@NotNull PsiElement> methodCallOptional = Arrays.stream(children).filter(f -> f instanceof PsiMethodCallExpression).findFirst();
                 if (methodCallOptional.isPresent()) {
                     PsiElement psiElement = methodCallOptional.get();
-                    Optional<@NotNull PsiElement> expressionOptional = Arrays.stream(psiElement.getChildren()).filter(f -> f instanceof PsiExpression).findFirst();
-                    if (expressionOptional.isPresent()) {
-                        PsiElement e = expressionOptional.get();
-                        if (e instanceof PsiExpression expression && expression.getType() != null) {
-                            return expression.getText();
-                        }
-                    }
+                    return psiElement.getText();
+//                    Optional<@NotNull PsiElement> expressionOptional = Arrays.stream(psiElement.getChildren()).filter(f -> f instanceof PsiExpression).findFirst();
+//                    if (expressionOptional.isPresent()) {
+//                        PsiElement e = expressionOptional.get();
+//                        if (e instanceof PsiExpression expression && expression.getType() != null) {
+//                            return expression.getText();
+//                        }
+//                    }
                 }
             }
         }

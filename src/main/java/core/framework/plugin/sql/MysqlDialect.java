@@ -13,6 +13,7 @@ public class MysqlDialect {
     public static final String VARCHAR = "VARCHAR";
     public static final String TIMESTAMP = "TIMESTAMP";
     public static final String BIT = "BIT";
+    public static final String DECIMAL = "DECIMAL";
 
     Map<String, String> types = new HashMap<>();
 
@@ -28,7 +29,10 @@ public class MysqlDialect {
         types.put(ClassUtils.LONG, "BIGINT");
     }
 
-    public String getType(String type, String columnName) {
+    public String getType(String type, String columnName, boolean isJson) {
+        if (isJson) {
+            return "JSON";
+        }
         String mysqlType = types.get(type);
         if (mysqlType != null) {
             if (VARCHAR.equals(mysqlType)) {
@@ -41,6 +45,11 @@ public class MysqlDialect {
                     size = 50;
                 }
                 return VARCHAR + "(" + size + ")";
+            } else if (mysqlType.contains(MysqlDialect.DECIMAL)) {
+                if (columnName.contains("rate")) {
+                    return DECIMAL + "(7, 6)";
+                }
+                return mysqlType;
             } else {
                 return mysqlType;
             }

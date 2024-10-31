@@ -10,8 +10,8 @@ import core.framework.plugin.utils.ClassUtils;
  * @author ebin
  */
 public class CollectToMapPopupStep extends SelectKeyPopupStep {
-    private static final String TEMPLATE = "%1$s().stream().collect(Collectors.toMap(k -> k.%2$s, Function.identity()));";
-    private static final String STEAM_TEMPLATE = "%1$s().collect(Collectors.toMap(k -> k.%2$s, Function.identity()));";
+    private static final String TEMPLATE = "%1$s.stream().collect(Collectors.toMap(k -> k.%2$s, Function.identity()));";
+    private static final String STEAM_TEMPLATE = "%1$s.collect(Collectors.toMap(k -> k.%2$s, Function.identity()));";
 
     public CollectToMapPopupStep(BeanDefinition beanDefinition, String variableName, Project project, Editor editor, PsiType type) {
         super(beanDefinition, variableName, project, editor, type);

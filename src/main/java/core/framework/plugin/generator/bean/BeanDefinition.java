@@ -43,29 +43,12 @@ public class BeanDefinition {
         return displayName;
     }
 
-    public Optional<String> getSimilarityField(String filedName, String fileType) {
-        int i = fileType.indexOf("<");
-        String genFileType = fileType;
-        if (i != -1) {
-            genFileType = genFileType.substring(0, i);
+    public Optional<String> getSimilarityField(String filedName) {
+        if (fields.containsKey(filedName)) {
+            return Optional.of(fields.get(filedName).name);
         }
-        Map<Integer, List<String>> collect = fields.keySet().stream().collect(Collectors.groupingBy((k -> StringUtils.getLevenshteinDistance(filedName, k))));
-        OptionalInt min = collect.keySet().stream().mapToInt(k -> k).min();
-        if (min.isPresent() && min.getAsInt() <= 3) {
-            List<String> candidate = collect.get(min.getAsInt());
-            if (candidate.isEmpty()) {
-                return Optional.empty();
-            }
-            String finalGenFileType = genFileType;
-            Optional<String> first = candidate.stream().filter(f -> finalGenFileType.contains(fields.get(f).typeName)).findFirst();
-            if (first.isEmpty()) {
-                first = candidate.stream().findFirst();
-            }
-            return first;
-        } else {
-            String lowerCase = filedName.toLowerCase();
-            return fields.keySet().stream().filter(f -> f.toLowerCase().contains(lowerCase) || lowerCase.contains(f.toLowerCase())).findFirst();
-        }
+        String lowerCase = filedName.toLowerCase();
+        return fields.keySet().stream().filter(f -> f.toLowerCase().contains(lowerCase) || lowerCase.contains(f.toLowerCase())).findFirst();
     }
 
     public Optional<String> getFieldType(String filedName) {

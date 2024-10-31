@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ public class BeanDefinition {
         PsiField[] classFields = beanClass.getFields();
         for (PsiField field : classFields) {
             String columnName = getColumnName(field);
+            boolean isJson = isJson(field);
             if (columnName == null) {
                 continue;
             }
@@ -66,7 +68,7 @@ public class BeanDefinition {
             if (i != -1) {
                 typeName = typeName.substring(0, i);
             }
-            String columnType = MysqlDialect.INSTANCE.getType(typeName, columnName);
+            String columnType = MysqlDialect.INSTANCE.getType(typeName, columnName, isJson);
             columns.put(columnName, columnType);
             if (isNotNull(field)) {
                 notNullFields.add(columnName);
@@ -166,6 +168,24 @@ public class BeanDefinition {
             }
         }
         return null;
+    }
+
+    private boolean isJson(PsiField field) {
+        PsiAnnotation[] filedAnnotations = field.getAnnotations();
+        for (PsiAnnotation filedAnnotation : filedAnnotations) {
+            String qualifiedName = filedAnnotation.getQualifiedName();
+            if (qualifiedName != null && filedAnnotation.getQualifiedName().contains("Column")) {
+                List<JvmAnnotationAttribute> attributes = filedAnnotation.getAttributes();
+                for (JvmAnnotationAttribute attribute : attributes) {
+                    if ("json".equals(attribute.getAttributeName())) {
+                        if (attribute instanceof PsiNameValuePairImpl) {
+                            return Objects.equals(((PsiNameValuePairImpl) attribute).getLiteralValue(), "true");
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isNotNull(PsiField field) {
