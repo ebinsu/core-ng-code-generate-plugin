@@ -35,6 +35,9 @@ public class WrapTryCatchIntentionAction extends PsiElementBaseIntentionAction i
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
+        if (editor == null) {
+            return;
+        }
         if (editor.getVirtualFile() == null) {
             return;
         }

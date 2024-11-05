@@ -35,6 +35,20 @@
 
         <intentionAction>
             <language>JAVA</language>
+            <className>core.framework.plugin.generator.format.FormatCamelToUnderLineIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
+            <className>core.framework.plugin.generator.format.FormatUnderLineToCamelIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
             <className>core.framework.plugin.generator.collection.GroupByMapIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
