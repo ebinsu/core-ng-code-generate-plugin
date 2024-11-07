@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '1.3.0'
+version '2.0.0'
 
 repositories {
     mavenCentral()
@@ -21,15 +21,14 @@ dependencies {
 
 // See https://github.com/JetBrains/gradlpatchPluginXml e-intellij-plugin/
 intellij {
-    version = '2024.1'
+    version = '2024.2'
     plugins = ['java']
 }
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>fix bugs</li>
-         <li>add format camel to under line</li>
-         <li>add format under line to camel</li>
+         <li>update to 2024.2</li>
+         <li>mysql varchar support size annotation</li>
        </ul>
       """
 }

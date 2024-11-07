@@ -5,7 +5,6 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiLiteralExpression;
 import com.intellij.psi.PsiReferenceExpression;
@@ -68,7 +67,8 @@ public class BeanDefinition {
             if (i != -1) {
                 typeName = typeName.substring(0, i);
             }
-            String columnType = MysqlDialect.INSTANCE.getType(typeName, columnName, isJson);
+            Integer columnSize = getColumnSize(field);
+            String columnType = MysqlDialect.INSTANCE.getType(typeName, columnName, isJson, columnSize);
             columns.put(columnName, columnType);
             if (isNotNull(field)) {
                 notNullFields.add(columnName);
@@ -162,6 +162,31 @@ public class BeanDefinition {
                     if ("name".equals(attribute.getAttributeName())) {
                         if (attribute instanceof PsiNameValuePairImpl) {
                             return ((PsiNameValuePairImpl) attribute).getLiteralValue();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private Integer getColumnSize(PsiField field) {
+        PsiAnnotation[] filedAnnotations = field.getAnnotations();
+        for (PsiAnnotation filedAnnotation : filedAnnotations) {
+            String qualifiedName = filedAnnotation.getQualifiedName();
+            if (qualifiedName != null && filedAnnotation.getQualifiedName().contains("Size")) {
+                List<JvmAnnotationAttribute> attributes = filedAnnotation.getAttributes();
+                for (JvmAnnotationAttribute attribute : attributes) {
+                    if ("max".equals(attribute.getAttributeName())) {
+                        if (attribute instanceof PsiNameValuePairImpl) {
+                            String literalValue = ((PsiNameValuePairImpl) attribute).getLiteralValue();
+                            if (literalValue != null) {
+                                try {
+                                    return Integer.valueOf(literalValue);
+                                } catch (Exception e) {
+                                    return null;
+                                }
+                            }
                         }
                     }
                 }

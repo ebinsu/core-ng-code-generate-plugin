@@ -29,7 +29,7 @@ public class MysqlDialect {
         types.put(ClassUtils.LONG, "BIGINT");
     }
 
-    public String getType(String type, String columnName, boolean isJson) {
+    public String getType(String type, String columnName, boolean isJson, Integer columnSize) {
         if (isJson) {
             return "JSON";
         }
@@ -37,7 +37,9 @@ public class MysqlDialect {
         if (mysqlType != null) {
             if (VARCHAR.equals(mysqlType)) {
                 int size = 100;
-                if (columnName.contains("ids")) {
+                if (columnSize != null) {
+                    size = columnSize;
+                } else if (columnName.contains("ids")) {
                     size = 500;
                 } else if (columnName.contains("note") || columnName.contains("reason")) {
                     size = 255;
