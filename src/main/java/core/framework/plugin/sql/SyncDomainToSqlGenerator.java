@@ -118,16 +118,24 @@ public class SyncDomainToSqlGenerator extends AnAction {
                     line = findLine(sqlDoc, addDefinition.beforeFirstColumnName) - 1;
                 }
                 if (line != -1) {
+                    String text = sqlDoc.getText(new TextRange(sqlDoc.getLineStartOffset(line), sqlDoc.getLineEndOffset(line)));
                     sqlDoc.insertString(sqlDoc.getLineEndOffset(line), "\n");
-                    sqlDoc.insertString(sqlDoc.getLineEndOffset(line + 1), addDefinition.toColumnSql());
+                    sqlDoc.insertString(sqlDoc.getLineEndOffset(line + 1), addDefinition.toColumnSql(text));
                 }
             });
 
             finalTableSyncDefinition.updateDefinitions.forEach(updateDefinition -> {
                 int line = findLine(sqlDoc, updateDefinition.columnName);
                 if (line != -1) {
+                    int preLine = line - 1;
+                    String text;
+                    if (preLine > 0) {
+                        text = sqlDoc.getText(new TextRange(sqlDoc.getLineStartOffset(preLine), sqlDoc.getLineEndOffset(preLine)));
+                    } else {
+                        text = "";
+                    }
                     sqlDoc.deleteString(sqlDoc.getLineStartOffset(line), sqlDoc.getLineEndOffset(line));
-                    sqlDoc.insertString(sqlDoc.getLineEndOffset(line), updateDefinition.toColumnSql());
+                    sqlDoc.insertString(sqlDoc.getLineEndOffset(line), updateDefinition.toColumnSql(text));
                 }
             });
 

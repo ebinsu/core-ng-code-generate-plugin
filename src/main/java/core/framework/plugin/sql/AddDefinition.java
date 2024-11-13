@@ -1,10 +1,12 @@
 package core.framework.plugin.sql;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
 import static core.framework.plugin.sql.BeanDefinition.EMPTY_BLOCK;
 import static core.framework.plugin.sql.BeanDefinition.LINE_START;
+import static core.framework.plugin.sql.BeanDefinition.SINGLE_EMPTY_BLOCK;
 
 /**
  * @author ebin
@@ -67,12 +69,56 @@ public class AddDefinition implements SqlDefinition {
         return this.dateType;
     }
 
-    public String toColumnSql() {
+    public String toColumnSql(String formatReferenceText) {
         String cname = columnName;
         if (!columnName.contains(COLUMN_NAME_FLAG)) {
             cname = COLUMN_NAME_FLAG + columnName + COLUMN_NAME_FLAG;
         }
-        return LINE_START + cname + EMPTY_BLOCK + dateType + EMPTY_BLOCK + constraint + ",";
+        int lineStartRepeatIndex = IntStream.range(0, formatReferenceText.length()).filter(i -> !Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+        String lineStart;
+        if (lineStartRepeatIndex != -1) {
+            lineStart = SINGLE_EMPTY_BLOCK.repeat(lineStartRepeatIndex);
+        } else {
+            lineStart = LINE_START;
+        }
+        int nameToTypeRepeatIndex = -1;
+        int columnNameEndIndex = IntStream.range(lineStartRepeatIndex, formatReferenceText.length()).filter(i -> Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+        int typeStartIndex = -1;
+        if (columnNameEndIndex != -1 && lineStartRepeatIndex != -1) {
+            typeStartIndex = IntStream.range(columnNameEndIndex, formatReferenceText.length()).filter(i -> !Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+            if (typeStartIndex != -1) {
+                int length = typeStartIndex - lineStartRepeatIndex;
+                nameToTypeRepeatIndex = length - cname.length();
+            }
+        }
+        String nameToType;
+        if (nameToTypeRepeatIndex != -1) {
+            nameToType = SINGLE_EMPTY_BLOCK.repeat(nameToTypeRepeatIndex);
+        } else {
+            nameToType = EMPTY_BLOCK;
+        }
+
+        int typeToConstRepeatIndex = -1;
+        String typeToConst;
+
+        if (typeStartIndex != -1) {
+            int typeEndIndex = IntStream.range(typeStartIndex, formatReferenceText.length()).filter(i -> Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+            if (typeEndIndex != -1) {
+                int constStartIndex = IntStream.range(typeEndIndex, formatReferenceText.length()).filter(i -> !Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+                if (constStartIndex != -1) {
+                    int length = constStartIndex - typeStartIndex;
+                    typeToConstRepeatIndex = length - dateType.length();
+                }
+            }
+        }
+
+        if (typeToConstRepeatIndex != -1) {
+            typeToConst = SINGLE_EMPTY_BLOCK.repeat(typeToConstRepeatIndex);
+        } else {
+            typeToConst = EMPTY_BLOCK;
+        }
+
+        return lineStart + cname + nameToType + dateType + typeToConst + constraint + ",";
     }
 
     @Override
