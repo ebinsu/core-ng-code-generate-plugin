@@ -44,7 +44,7 @@ public class UpdateDefinition implements SqlDefinition {
         }
         int lineStartRepeatIndex = IntStream.range(0, formatReferenceText.length()).filter(i -> !Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
         String lineStart;
-        if (lineStartRepeatIndex != -1) {
+        if (lineStartRepeatIndex > 0) {
             lineStart = SINGLE_EMPTY_BLOCK.repeat(lineStartRepeatIndex);
         } else {
             lineStart = LINE_START;
@@ -60,7 +60,7 @@ public class UpdateDefinition implements SqlDefinition {
             }
         }
         String nameToType;
-        if (nameToTypeRepeatIndex != -1) {
+        if (nameToTypeRepeatIndex > 0) {
             nameToType = SINGLE_EMPTY_BLOCK.repeat(nameToTypeRepeatIndex);
         } else {
             nameToType = EMPTY_BLOCK;
@@ -80,7 +80,7 @@ public class UpdateDefinition implements SqlDefinition {
             }
         }
 
-        if (typeToConstRepeatIndex != -1) {
+        if (typeToConstRepeatIndex > 0) {
             typeToConst = SINGLE_EMPTY_BLOCK.repeat(typeToConstRepeatIndex);
         } else {
             typeToConst = EMPTY_BLOCK;
