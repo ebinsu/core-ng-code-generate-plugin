@@ -102,7 +102,13 @@ public class AddDefinition implements SqlDefinition {
         String typeToConst;
 
         if (typeStartIndex != -1) {
-            int typeEndIndex = IntStream.range(typeStartIndex, formatReferenceText.length()).filter(i -> Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+            int index = formatReferenceText.substring(typeStartIndex).indexOf(")");
+            int typeEndIndex;
+            if (index != -1) {
+                typeEndIndex = typeStartIndex + index + 1;
+            } else {
+                typeEndIndex = IntStream.range(typeStartIndex, formatReferenceText.length()).filter(i -> Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
+            }
             if (typeEndIndex != -1) {
                 int constStartIndex = IntStream.range(typeEndIndex, formatReferenceText.length()).filter(i -> !Character.isWhitespace(formatReferenceText.charAt(i))).findFirst().orElse(-1);
                 if (constStartIndex != -1) {

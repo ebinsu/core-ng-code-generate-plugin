@@ -111,7 +111,7 @@ public class SqlFileToDomainLineMarkerProvider extends RelatedItemLineMarkerProv
                     }
                 }
                 if (targetPsiClass != null) {
-                    NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.FileTypes.JavaClass)
+                    NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.FileTypes.Java)
                         .setTarget(targetPsiClass)
                         .setTooltipText("Navigate to " + targetPsiClass.getQualifiedName())
                         .setAlignment(GutterIconRenderer.Alignment.CENTER);
