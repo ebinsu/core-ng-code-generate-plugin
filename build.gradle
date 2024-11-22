@@ -1,12 +1,16 @@
 plugins {
-    id "org.jetbrains.intellij" version "1.17.3"
+    id 'org.jetbrains.intellij.platform' version '2.1.0'
 }
 
 group 'core.framework'
-version '2.3.0'
+version '3.0.0'
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
@@ -16,18 +20,17 @@ dependencies {
     implementation group: 'com.alibaba', name: 'druid', version: '1.2.11'
     implementation group: 'com.google.guava', name: 'guava', version: '33.3.1-jre'
 
-
+    intellijPlatform {
+        intellijIdeaCommunity('2024.3')
+        bundledPlugin 'com.intellij.java'
+        instrumentationTools()
+    }
 }
 
-// See https://github.com/JetBrains/gradlpatchPluginXml e-intellij-plugin/
-intellij {
-    version = '2024.2'
-    plugins = ['java']
-}
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>fix bugs</li>
+         <li>update intellijPlatform to 2024.3</li>
        </ul>
       """
 }
