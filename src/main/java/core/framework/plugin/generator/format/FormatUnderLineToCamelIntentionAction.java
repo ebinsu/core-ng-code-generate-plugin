@@ -23,11 +23,11 @@ public class FormatUnderLineToCamelIntentionAction extends AbstractFormatIntenti
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "Format underline to camel";
+        return "* Format underline to camel";
     }
 
     @Override
     protected String formatString(String selectedText) {
-        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, selectedText);
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, selectedText);
     }
 }

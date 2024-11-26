@@ -90,7 +90,7 @@ public class WrapTryCatchIntentionAction extends PsiElementBaseIntentionAction i
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "Wrap try catch";
+        return "- Wrap try catch";
     }
 
 

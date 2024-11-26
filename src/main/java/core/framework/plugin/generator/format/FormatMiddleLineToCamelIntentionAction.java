@@ -11,23 +11,23 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author ebin
  */
-public class FormatCamelToUnderLineIntentionAction extends AbstractFormatIntentionAction {
+public class FormatMiddleLineToCamelIntentionAction extends AbstractFormatIntentionAction {
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         String selectedText = editor.getSelectionModel().getSelectedText();
         if (!StringUtils.isEmpty(selectedText)) {
-            return !selectedText.contains("_") && !selectedText.contains("-") && hasUpperCase(selectedText);
+            return selectedText.contains("-");
         }
         return false;
     }
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "* Format camel to underline";
+        return "* Format middle line to camel";
     }
 
     @Override
     protected String formatString(String selectedText) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, selectedText);
+        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, selectedText);
     }
 }

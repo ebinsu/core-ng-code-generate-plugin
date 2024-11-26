@@ -42,7 +42,21 @@
 
         <intentionAction>
             <language>JAVA</language>
+            <className>core.framework.plugin.generator.format.FormatCamelToMiddleLineIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
             <className>core.framework.plugin.generator.format.FormatUnderLineToCamelIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
+            <className>core.framework.plugin.generator.format.FormatMiddleLineToCamelIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>

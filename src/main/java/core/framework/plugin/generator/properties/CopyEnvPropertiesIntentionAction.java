@@ -98,7 +98,7 @@ public class CopyEnvPropertiesIntentionAction extends PsiElementBaseIntentionAct
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "Copy select properties to other env properties";
+        return "* Copy select properties to other env properties";
     }
 
     @NotNull
