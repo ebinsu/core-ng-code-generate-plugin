@@ -84,7 +84,7 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "#Populate properties";
+        return "# Populate properties";
     }
 
     @NotNull
