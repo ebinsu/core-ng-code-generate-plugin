@@ -63,7 +63,7 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
                 return;
             }
             codeLine = optional.get();
-        } else if ((selectBlock instanceof PsiLocalVariable focusLocalVariable)) {
+        } else if (selectBlock instanceof PsiLocalVariable focusLocalVariable) {
             PsiType focusLocalVariableType = focusLocalVariable.getType();
             PsiClass selectLocalVariableTypeClass = javaPsiFacade.findClass(
                 focusLocalVariableType.getCanonicalText(),
