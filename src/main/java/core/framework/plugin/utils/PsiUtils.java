@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpressionStatement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiLambdaExpression;
 import com.intellij.psi.PsiMethod;
@@ -78,6 +79,20 @@ public final class PsiUtils {
                 }
             }
         } while (maybeMethod.getParent() != null);
+        return Optional.empty();
+    }
+
+    public static Optional<PsiElement> findExpressionStatement(PsiElement psiElement) {
+        if (psiElement instanceof PsiExpressionStatement) {
+            return Optional.of(psiElement);
+        }
+        PsiElement maybeStatement = psiElement;
+        do {
+            maybeStatement = maybeStatement.getParent();
+            if (maybeStatement instanceof PsiExpressionStatement) {
+                return Optional.of(maybeStatement);
+            }
+        } while (maybeStatement.getParent() != null);
         return Optional.empty();
     }
 

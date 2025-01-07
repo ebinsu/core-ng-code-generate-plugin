@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '3.1.0'
+version '3.2.0'
 
 repositories {
     mavenCentral()
@@ -30,9 +30,7 @@ dependencies {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>add camel to middle line</li>
-         <li>add middle line to camel</li>
-         <li>order actions seq</li>
+         <li>reference expression add set bean properties action</li>
        </ul>
       """
 }
