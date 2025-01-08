@@ -7,7 +7,6 @@ import com.alibaba.druid.sql.ast.statement.SQLTableElement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -21,25 +20,24 @@ import core.framework.plugin.utils.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @author ebin
  */
-public class AddIndex extends AnAction {
+public class AddIndex extends AbstractSqlFileAction {
     public static final String ADD_INDEX_TPL = """
-            SELECT COUNT(*) INTO @index FROM information_schema.`STATISTICS`
-            WHERE table_schema=DATABASE() AND table_name='%1$s' AND index_name = '%2$s';
-            SET @SQL=IF(@index<1,'ALTER TABLE `%1$s` ADD INDEX `%2$s`(%3$s);','select \\'Index Not Exist\\';');
-            PREPARE statement FROM @SQL;
-            EXECUTE statement;
-            """;
+        SELECT COUNT(*) INTO @index FROM information_schema.`STATISTICS`
+        WHERE table_schema=DATABASE() AND table_name='%1$s' AND index_name = '%2$s';
+        SET @SQL=IF(@index<1,'ALTER TABLE `%1$s` ADD INDEX `%2$s`(%3$s);','select \\'Index Not Exist\\';');
+        PREPARE statement FROM @SQL;
+        EXECUTE statement;
+        """;
 
     public static final String INDEX_DEF = """
-            INDEX `%1$s`(%2$s)
-            """;
+        INDEX `%1$s`(%2$s)
+        """;
     public static final String COLUMN_NAME_FLAG = "`";
 
     @Override
@@ -83,8 +81,8 @@ public class AddIndex extends AnAction {
         }
         List<String> selects = addIndexDialogWrapper.selects.stream().map(currentColumns::get).toList();
         List<String> currentIndex = currentStatement.getMysqlIndexes().stream()
-                .map(m -> m.getColumns().stream().map(SQLObjectImpl::toString).sorted().collect(Collectors.joining()))
-                .toList();
+            .map(m -> m.getColumns().stream().map(SQLObjectImpl::toString).sorted().collect(Collectors.joining()))
+            .toList();
         String addIndex = selects.stream().sorted().collect(Collectors.joining());
         if (currentIndex.contains(addIndex)) {
             Messages.showMessageDialog("Index already exists.", "Error", Messages.getErrorIcon());

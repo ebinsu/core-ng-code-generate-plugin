@@ -8,4 +8,8 @@ public final class FileUtils {
         return extension.equals("sql");
     }
 
+    public static boolean isJsonFile(String fileName) {
+        String extension = FilenameUtils.getExtension(fileName);
+        return extension.equals("json");
+    }
 }

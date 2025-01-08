@@ -1,11 +1,15 @@
 package core.framework.plugin.dependence;
 
-import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.ide.actions.EditSourceAction;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.TextRange;
@@ -31,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * @author ebin
  */
-public class UpdateDependenceVersion extends AnAction {
+public class UpdateDependenceVersion extends EditSourceAction {
     private static final Pattern PATTERN = Pattern.compile("(implementation|runtimeOnly|testRuntimeOnly)\\s*\\(\".*:(?<dependenceName>.*):\\$\\{(?<variable>.*)}");
     private static final Pattern SETTINGS_GRADLE_PATTERN = Pattern.compile("library\\s*.*,\\s*\"(?<dependence>.*)\"");
     private static final Pattern INTERFACE_PATTERN = Pattern.compile("[^\\s:]+-[^\\s:]+");
@@ -39,6 +43,27 @@ public class UpdateDependenceVersion extends AnAction {
     private static final String DEF_TPL = "val %1$s = \"%2$s\"";
     private static final String GRADLE_TPL = "%1$s=%2$s";
     private static final String FORMAT = "\n************************************************\n";
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        e.getPresentation().setVisible(isClickRootModule(e));
+    }
+
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    private boolean isClickRootModule(AnActionEvent e) {
+        Project project = getEventProject(e);
+        Module module = e.getData(PlatformCoreDataKeys.MODULE);
+        if (project != null && module != null) {
+            VirtualFile moduleFolder = e.getData(CommonDataKeys.VIRTUAL_FILE);
+            if (moduleFolder != null) {
+                return project.getName().equals(moduleFolder.getName());
+            }
+        }
+        return false;
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {

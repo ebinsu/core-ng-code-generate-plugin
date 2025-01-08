@@ -11,7 +11,6 @@ import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.intellij.ide.util.TreeClassChooser;
 import com.intellij.ide.util.TreeClassChooserFactory;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -36,10 +35,7 @@ import static core.framework.plugin.sql.BeanDefinition.COLUMN_NAME_FLAG;
 /**
  * @author ebin
  */
-public class SyncDomainToSqlGenerator extends AnAction {
-
-    public static final String CREATE_TABLE_SCRIPT_END = "InnoDB;";
-
+public class SyncDomainToSqlGenerator extends AbstractSqlFileAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getData(PlatformDataKeys.PROJECT);
