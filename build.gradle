@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '3.2.0'
+version '3.2.1'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,8 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.11.0'
     implementation group: 'com.alibaba', name: 'druid', version: '1.2.11'
     implementation group: 'com.google.guava', name: 'guava', version: '33.3.1-jre'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.2'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.2'
 
     intellijPlatform {
         intellijIdeaCommunity('2024.3')
@@ -30,7 +32,7 @@ dependencies {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>reference expression add set bean properties action</li>
+         <li>Adjust the timing of the action display</li>
        </ul>
       """
 }
