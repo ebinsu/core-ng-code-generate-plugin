@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.intellij.platform' version '2.1.0'
+    id 'org.jetbrains.intellij.platform' version '2.9.0'
 }
 
 group 'core.framework'
-version '3.2.1'
+version '3.3.0'
 
 repositories {
     mavenCentral()
@@ -23,7 +23,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.2'
 
     intellijPlatform {
-        intellijIdeaCommunity('2024.3')
+        intellijIdeaCommunity('2025.2')
         bundledPlugin 'com.intellij.java'
         instrumentationTools()
     }
