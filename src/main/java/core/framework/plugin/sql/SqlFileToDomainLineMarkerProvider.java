@@ -83,7 +83,7 @@ public class SqlFileToDomainLineMarkerProvider extends RelatedItemLineMarkerProv
                 List<VirtualFile> virtualFiles = VfsUtil.collectChildrenRecursively(appPath);
                 String finalPath = path;
                 List<String> domainPackageNames = virtualFiles.stream()
-                    .filter(f -> f instanceof VirtualDirectoryImpl && f.getPath().contains("domain"))
+                    .filter(f -> f.getPath().contains("domain"))
                     .map(m -> ("app" + m.getPath().replace(finalPath, "")).replace("/", "."))
                     .toList();
                 GlobalSearchScope globalSearchScope = GlobalSearchScope.allScope(element.getProject());
