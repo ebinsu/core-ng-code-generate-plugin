@@ -80,6 +80,18 @@ public class AddIndex extends AbstractSqlFileAction {
             return;
         }
         List<String> selects = addIndexDialogWrapper.selects.stream().map(currentColumns::get).toList();
+        if (selects.isEmpty()) {
+            return;
+        }
+
+        SortIndexDialogWrapper sortIndexDialogWrapper = new SortIndexDialogWrapper(selects);
+        sortIndexDialogWrapper.show();
+        if (sortIndexDialogWrapper.cancel) {
+            return;
+        }
+
+        selects = sortIndexDialogWrapper.getData();
+
         List<String> currentIndex = currentStatement.getMysqlIndexes().stream()
             .map(m -> m.getColumns().stream().map(SQLObjectImpl::toString).sorted().collect(Collectors.joining()))
             .toList();

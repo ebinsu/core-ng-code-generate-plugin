@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '3.3.0'
+version '3.4.0'
 
 repositories {
     mavenCentral()
@@ -32,7 +32,7 @@ dependencies {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>Adjust the timing of the action display</li>
+         <li>Add sort index</li>
        </ul>
       """
 }

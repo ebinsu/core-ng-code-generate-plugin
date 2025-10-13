@@ -2,6 +2,7 @@ package core.framework.plugin.sql;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.CheckBoxList;
+import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -51,7 +52,7 @@ public class SyncDomainToSqlDialogWrapper extends DialogWrapper {
         JPanel dialogPanel = new JPanel(new BorderLayout());
         dialogPanel.add(impactColumnCheckBox, BorderLayout.CENTER);
 
-        JScrollPane jScrollPane = new JScrollPane();
+        JBScrollPane jScrollPane = new JBScrollPane();
         jScrollPane.setSize(800, 500);
         jScrollPane.setAutoscrolls(true);
         jScrollPane.setViewportView(dialogPanel);

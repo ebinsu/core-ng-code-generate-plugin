@@ -1,16 +1,14 @@
 package core.framework.plugin.sql;
 
-import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.CheckBoxList;
+import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author ebin
@@ -38,7 +36,10 @@ public class AddIndexDialogWrapper extends DialogWrapper {
                     selects.add(i);
                 }
             } else {
-                selects.remove(i);
+                int idx = selects.indexOf(i);
+                if (idx != -1) {
+                    selects.remove(idx);
+                }
             }
         });
         setSize(800, 500);
@@ -49,7 +50,7 @@ public class AddIndexDialogWrapper extends DialogWrapper {
     protected @Nullable JComponent createCenterPanel() {
         JPanel dialogPanel = new JPanel(new BorderLayout());
         dialogPanel.add(columnCheckBox, BorderLayout.CENTER);
-        JScrollPane jScrollPane = new JScrollPane();
+        JBScrollPane jScrollPane = new JBScrollPane();
         jScrollPane.setSize(800, 500);
         jScrollPane.setAutoscrolls(true);
         jScrollPane.setViewportView(dialogPanel);
