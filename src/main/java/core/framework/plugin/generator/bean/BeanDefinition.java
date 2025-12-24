@@ -3,14 +3,11 @@ package core.framework.plugin.generator.bean;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import core.framework.plugin.utils.PsiUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 /**
  * @author ebin
@@ -48,7 +45,7 @@ public class BeanDefinition {
             return Optional.of(fields.get(filedName).name);
         }
         String lowerCase = filedName.toLowerCase();
-        return fields.keySet().stream().filter(f -> f.toLowerCase().contains(lowerCase) || lowerCase.contains(f.toLowerCase())).findFirst();
+        return fields.keySet().stream().filter(f -> f.toLowerCase().equals(lowerCase)).findFirst();
     }
 
     public Optional<String> getFieldType(String filedName) {
