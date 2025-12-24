@@ -84,7 +84,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                 return;
             }
             if (ClassUtils.isJavaBean(type.typeName)) {
-                statements.addAll(buildBeanExpandAndSetNullStatement(type.typeName, fieldName));
+                statements.addAll(buildBeanExpandAndSetNullStatement(type));
             } else {
                 String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
                 statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
@@ -160,7 +160,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                     PsiClass sourceBeanClass = javaPsiFacade.findClass(sourceFieldType, GlobalSearchScope.allScope(project));
                     PsiClass targetBeanClass = javaPsiFacade.findClass(targetBeanField.typeName, GlobalSearchScope.allScope(project));
                     if (sourceBeanClass == null || targetBeanClass == null) {
-                        statements.addAll(buildBeanExpandAndSetNullStatement(targetBeanField.typeName, targetFieldName));
+                        statements.addAll(buildBeanExpandAndSetNullStatement(targetBeanField));
                     } else {
                         statements.addAll(fillJavaBeanProperties(targetFieldName, targetBeanField, targetBeanClass, sourceBeanClass, source.variableName));
                     }
@@ -170,7 +170,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
                 }
             } else {
                 if (ClassUtils.isJavaBean(targetBeanField.typeName)) {
-                    statements.addAll(buildBeanExpandAndSetNullStatement(targetBeanField.typeName, targetFieldName));
+                    statements.addAll(buildBeanExpandAndSetNullStatement(targetBeanField));
                 } else {
                     String statement = String.format(NON_PROPERTIES_TEMPLATE, targetVariableName, targetFieldName);
                     statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
@@ -182,7 +182,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
 
     private List<PsiStatement> fillJavaBeanProperties(String targetFieldName, BeanField targetFiledBeanField, PsiClass targetBeanClass, PsiClass sourceBeanClass, String sourceVariableName) {
         List<PsiStatement> statements = new ArrayList<>();
-        String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE_V2, targetFiledBeanField.typeName, targetFieldName);
+        String statementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE_V2, targetFiledBeanField.simpleTypeName, targetFieldName);
         statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
 
         BeanDefinition targetFiledBeanDefinition = new BeanDefinition(targetBeanClass, targetFieldName);
@@ -196,22 +196,22 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         return statements;
     }
 
-    private List<PsiStatement> buildBeanExpandAndSetNullStatement(String beanClassStr, String variableName) {
+    private List<PsiStatement> buildBeanExpandAndSetNullStatement(BeanField targetBeanField) {
         List<PsiStatement> statements = new ArrayList<>();
-        PsiClass beanClass = javaPsiFacade.findClass(beanClassStr, GlobalSearchScope.allScope(project));
+        PsiClass beanClass = javaPsiFacade.findClass(targetBeanField.typeName, GlobalSearchScope.allScope(project));
         if (beanClass == null) {
             return statements;
         }
-        String newStatementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE_V2, beanClassStr, variableName);
+        String newStatementStr = String.format(NON_PROPERTIES_JAVA_BEAN_TEMPLATE_V2, targetBeanField.simpleTypeName, targetBeanField.name);
         statements.add(elementFactory.createStatementFromText(newStatementStr, psiFile.getContext()));
 
-        BeanDefinition beanDefinition = new BeanDefinition(beanClass, variableName);
+        BeanDefinition beanDefinition = new BeanDefinition(beanClass, targetBeanField.name);
         beanDefinition.fields.forEach((fieldName, beanField) -> {
-            String statementStr = String.format(NON_PROPERTIES_TEMPLATE, variableName, fieldName);
+            String statementStr = String.format(NON_PROPERTIES_TEMPLATE, targetBeanField.name, fieldName);
             statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
         });
 
-        String setStatementStr = String.format(NON_PROPERTIES_JAVA_BEAN_SET_TEMPLATE, target.variableName, variableName);
+        String setStatementStr = String.format(NON_PROPERTIES_JAVA_BEAN_SET_TEMPLATE, target.variableName, targetBeanField.name);
         statements.add(elementFactory.createStatementFromText(setStatementStr, psiFile.getContext()));
         return statements;
     }
