@@ -35,6 +35,13 @@
 
         <intentionAction>
             <language>JAVA</language>
+            <className>core.framework.plugin.generator.format.FormatStyleTextToSentenceIntentionAction</className>
+            <category>CoreNgStylePlugin</category>
+            <skipBeforeAfter>true</skipBeforeAfter>
+        </intentionAction>
+
+        <intentionAction>
+            <language>JAVA</language>
             <className>core.framework.plugin.generator.format.FormatCamelToUnderLineIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>

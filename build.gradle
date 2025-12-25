@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '3.6.0'
+version '3.7.0'
 
 repositories {
     mavenCentral()
@@ -32,8 +32,7 @@ dependencies {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>refine gen bean action</li>
-         <li>refine update dependencies action</li>
+         <li>add text format action</li>
        </ul>
       """
 }
