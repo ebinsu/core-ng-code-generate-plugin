@@ -33,6 +33,7 @@ patchPluginXml {
     changeNotes = """
       <ul>
          <li>refine gen bean action</li>
+         <li>refine update dependencies action</li>
        </ul>
       """
 }

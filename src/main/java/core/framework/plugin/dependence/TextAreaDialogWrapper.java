@@ -2,6 +2,7 @@ package core.framework.plugin.dependence;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.EditorTextField;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 
 import javax.swing.*;
@@ -19,6 +20,7 @@ public class TextAreaDialogWrapper extends DialogWrapper {
         super(true); // use current window as parent
         setTitle(title);
         textField = new JBTextArea(defaultName);
+        setSize(800, 500);
         init();
     }
 
@@ -26,8 +28,11 @@ public class TextAreaDialogWrapper extends DialogWrapper {
     protected JComponent createCenterPanel() {
         JPanel dialogPanel = new JPanel(new BorderLayout());
         dialogPanel.add(textField, BorderLayout.CENTER);
-        dialogPanel.setPreferredSize(new Dimension(800, 500));
-        return dialogPanel;
+        JBScrollPane jScrollPane = new JBScrollPane();
+        jScrollPane.setSize(800, 500);
+        jScrollPane.setAutoscrolls(true);
+        jScrollPane.setViewportView(dialogPanel);
+        return jScrollPane;
     }
 
     @Override

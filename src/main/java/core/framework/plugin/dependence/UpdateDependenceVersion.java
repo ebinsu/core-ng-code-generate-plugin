@@ -21,13 +21,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -84,9 +82,9 @@ public class UpdateDependenceVersion extends EditSourceAction {
             GlobalSearchScope.FilesScope.allScope(project)
         );
         FileDocumentManager documentManager = FileDocumentManager.getInstance();
-        List<Document> buildDoc = buildFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
-        List<Document> gradleDoc = gradleFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
-        List<Document> settingsGradleDoc = settingsGradleFiles.stream().map(documentManager::getDocument).filter(Objects::nonNull).toList();
+        List<DocHolder> buildDoc = buildFiles.stream().map(v -> new DocHolder(documentManager.getDocument(v), v)).filter(f -> f.document() != null).toList();
+        List<DocHolder> gradleDoc = gradleFiles.stream().map(v -> new DocHolder(documentManager.getDocument(v), v)).filter(f -> f.document() != null).toList();
+        List<DocHolder> settingsGradleDoc = settingsGradleFiles.stream().map(v -> new DocHolder(documentManager.getDocument(v), v)).filter(f -> f.document() != null).toList();
 
         //INPUT
         TextAreaDialogWrapper dialog = new TextAreaDialogWrapper("Input Dependence:Version", "");
@@ -116,11 +114,12 @@ public class UpdateDependenceVersion extends EditSourceAction {
             return;
         }
 
-        Messages.showMessageDialog(inputVersion(dependenceVersion), "Input Version", Messages.getInformationIcon());
+        Messages.showMessageDialog(inputVersion(dependenceVersion), "Input Version (  " + dependenceVersion.size() + " )", Messages.getInformationIcon());
 
         //FROM buildFiles
         Map<String, String> variableDependence = new HashMap<>();
-        for (Document doc : buildDoc) {
+        for (DocHolder docHolder : buildDoc) {
+            Document doc = docHolder.document();
             int lineCount = doc.getLineCount();
             for (int i = 0; i < lineCount; i++) {
                 TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
@@ -139,7 +138,7 @@ public class UpdateDependenceVersion extends EditSourceAction {
             }
         }
 
-        Map<String, List<Pair<String, String>>> changeHistories = previewChange(buildDoc, variableDependence, dependenceVersion, gradleDoc, settingsGradleDoc);
+        Map<String, List<Pair<String, String>>> changeHistories = previewChange(variableDependence, dependenceVersion, buildDoc, gradleDoc, settingsGradleDoc);
         TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change Histories", "");
         historyDialog.setInputText(changeHistory(changeHistories));
         historyDialog.show();
@@ -147,116 +146,37 @@ public class UpdateDependenceVersion extends EditSourceAction {
         if (historyDialog.cancel) {
             return;
         }
-
+        WriteDocHandler writeDocHandler = new WriteDocHandler();
         WriteCommandAction.runWriteCommandAction(project, () -> {
             //UPDATE build.gradle def
-            for (Document doc : buildDoc) {
-                int lineCount = doc.getLineCount();
-                for (int i = 0; i < lineCount; i++) {
-                    TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
-                    String text = doc.getText(textRange);
-                    if (text.startsWith("val") && text.contains("=")) {
-                        String leftTxt = text.split("=")[0];
-                        String varName = leftTxt.replace("val", "").trim();
-                        String dependenceName = variableDependence.get(varName);
-                        String version = dependenceVersion.get(dependenceName);
-                        if (version != null) {
-                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(DEF_TPL, varName, version));
-                        }
-                    }
-                }
-            }
+            handleBuildDoc(variableDependence, dependenceVersion, buildDoc, writeDocHandler);
             //UPDATE gradle.properties
-            for (Document doc : gradleDoc) {
-                int lineCount = doc.getLineCount();
-                for (int i = 0; i < lineCount; i++) {
-                    TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
-                    String text = doc.getText(textRange);
-                    if (!text.startsWith("#") && text.contains("=")) {
-                        String varName = text.split("=")[0].trim();
-                        String dependenceName = variableDependence.get(varName);
-                        String version = dependenceVersion.get(dependenceName);
-                        if (version != null) {
-                            doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), String.format(GRADLE_TPL, varName, version));
-                        }
-                    }
-                }
-            }
+            handleGradleDoc(variableDependence, dependenceVersion, gradleDoc, writeDocHandler);
             //UPDATE settings.gradle.kts
-            for (Document doc : settingsGradleDoc) {
-                int lineCount = doc.getLineCount();
-                for (int i = 0; i < lineCount; i++) {
-                    TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
-                    String text = doc.getText(textRange);
-                    if (text.trim().startsWith("library")) {
-                        Matcher matcher = SETTINGS_GRADLE_PATTERN.matcher(text);
-                        if (matcher.find()) {
-                            String dependenceStr = matcher.group("dependence");
-                            if (StringUtils.isNotEmpty(dependenceStr)) {
-                                Matcher dependenceNameMatcher = INTERFACE_PATTERN.matcher(dependenceStr);
-                                Matcher versionMatcher = VERSON_PATTERN.matcher(dependenceStr);
-                                if (dependenceNameMatcher.find() && versionMatcher.find()) {
-                                    String dependenceName = dependenceNameMatcher.group();
-                                    String oldVersion = versionMatcher.group();
-                                    String version = dependenceVersion.get(dependenceName);
-                                    if (version != null && !version.equals(oldVersion)) {
-                                        String newText = text.replace(oldVersion, version);
-                                        doc.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), newText);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            handleSettingsDoc(dependenceVersion, settingsGradleDoc, writeDocHandler);
         });
     }
 
-    private Map<String, List<Pair<String, String>>> previewChange(List<Document> buildDoc,
-                                                                  Map<String, String> variableDependence,
+    private Map<String, List<Pair<String, String>>> previewChange(Map<String, String> variableDependence,
                                                                   Map<String, String> dependenceVersion,
-                                                                  List<Document> gradleDoc,
-                                                                  List<Document> settingsGradleDoc) {
+                                                                  List<DocHolder> buildDoc,
+                                                                  List<DocHolder> gradleDoc,
+                                                                  List<DocHolder> settingsGradleDoc) {
         Map<String, List<Pair<String, String>>> changeHistories = new LinkedHashMap<>();
+        PreviewDocHandler previewDocHandler = new PreviewDocHandler(changeHistories);
         //UPDATE build.gradle def
-        for (Document doc : buildDoc) {
-            int lineCount = doc.getLineCount();
-            for (int i = 0; i < lineCount; i++) {
-                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
-                String text = doc.getText(textRange);
-                if (text.startsWith("val") && text.contains("=")) {
-                    String leftTxt = text.split("=")[0];
-                    String varName = leftTxt.replace("val", "").trim();
-                    String dependenceName = variableDependence.get(varName);
-                    String version = dependenceVersion.get(dependenceName);
-                    if (version != null) {
-                        String newDef = String.format(DEF_TPL, varName, version);
-                        String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
-                        changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
-                    }
-                }
-            }
-        }
+        handleBuildDoc(variableDependence, dependenceVersion, buildDoc, previewDocHandler);
         //UPDATE gradle.properties
-        for (Document doc : gradleDoc) {
-            int lineCount = doc.getLineCount();
-            for (int i = 0; i < lineCount; i++) {
-                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
-                String text = doc.getText(textRange);
-                if (!text.startsWith("#") && text.contains("=")) {
-                    String varName = text.split("=")[0].trim();
-                    String dependenceName = variableDependence.get(varName);
-                    String version = dependenceVersion.get(dependenceName);
-                    if (version != null) {
-                        String newDef = String.format(GRADLE_TPL, varName, version);
-                        String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
-                        changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newDef));
-                    }
-                }
-            }
-        }
+        handleGradleDoc(variableDependence, dependenceVersion, gradleDoc, previewDocHandler);
+        //UPDATE settings.gradle.kts
+        handleSettingsDoc(dependenceVersion, settingsGradleDoc, previewDocHandler);
+        return changeHistories;
+    }
 
-        for (Document doc : settingsGradleDoc) {
+    private void handleSettingsDoc(Map<String, String> dependenceVersion, List<DocHolder> settingsGradleDoc,
+                                   IDocHandler docHandler) {
+        for (DocHolder docHolder : settingsGradleDoc) {
+            Document doc = docHolder.document();
             int lineCount = doc.getLineCount();
             for (int i = 0; i < lineCount; i++) {
                 TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
@@ -274,8 +194,7 @@ public class UpdateDependenceVersion extends EditSourceAction {
                                 String version = dependenceVersion.get(dependenceName);
                                 if (version != null && !version.equals(oldVersion)) {
                                     String newText = text.replace(oldVersion, version);
-                                    String fileName = doc.toString().replace("DocumentImpl[file://", "").replace("]", "");
-                                    changeHistories.computeIfAbsent(fileName, k -> new ArrayList<>()).add(Pair.of(text, newText));
+                                    docHandler.handle(docHolder, textRange, text, newText);
                                 }
                             }
                         }
@@ -283,8 +202,49 @@ public class UpdateDependenceVersion extends EditSourceAction {
                 }
             }
         }
+    }
 
-        return changeHistories;
+    private void handleGradleDoc(Map<String, String> variableDependence, Map<String, String> dependenceVersion,
+                                 List<DocHolder> gradleDoc, IDocHandler docHandler) {
+        for (DocHolder docHolder : gradleDoc) {
+            Document doc = docHolder.document();
+            int lineCount = doc.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                String text = doc.getText(textRange);
+                if (!text.startsWith("#") && text.contains("=")) {
+                    String varName = text.split("=")[0].trim();
+                    String dependenceName = variableDependence.get(varName);
+                    String version = dependenceVersion.get(dependenceName);
+                    if (version != null) {
+                        String newDef = String.format(GRADLE_TPL, varName, version);
+                        docHandler.handle(docHolder, textRange, text, newDef);
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleBuildDoc(Map<String, String> variableDependence, Map<String, String> dependenceVersion,
+                                List<DocHolder> buildDoc, IDocHandler docHandler) {
+        for (DocHolder docHolder : buildDoc) {
+            Document doc = docHolder.document();
+            int lineCount = doc.getLineCount();
+            for (int i = 0; i < lineCount; i++) {
+                TextRange textRange = new TextRange(doc.getLineStartOffset(i), doc.getLineEndOffset(i));
+                String text = doc.getText(textRange);
+                if (text.startsWith("val") && text.contains("=")) {
+                    String leftTxt = text.split("=")[0];
+                    String varName = leftTxt.replace("val", "").trim();
+                    String dependenceName = variableDependence.get(varName);
+                    String version = dependenceVersion.get(dependenceName);
+                    if (version != null) {
+                        String newDef = String.format(DEF_TPL, varName, version);
+                        docHandler.handle(docHolder, textRange, text, newDef);
+                    }
+                }
+            }
+        }
     }
 
     private String inputVersion(Map<String, String> dependenceVersion) {
@@ -299,4 +259,6 @@ public class UpdateDependenceVersion extends EditSourceAction {
             m.getValue().stream().map(x -> "--- " + x.getKey() + "\n" + "+++ " + x.getValue()).collect(Collectors.joining("\n\n", FORMAT, FORMAT))
         ).collect(Collectors.joining("\n\n"));
     }
+
+
 }
