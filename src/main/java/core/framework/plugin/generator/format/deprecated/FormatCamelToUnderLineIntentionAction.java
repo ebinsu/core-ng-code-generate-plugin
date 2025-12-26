@@ -1,4 +1,4 @@
-package core.framework.plugin.generator.format;
+package core.framework.plugin.generator.format.deprecated;
 
 import com.google.common.base.CaseFormat;
 import com.intellij.codeInspection.util.IntentionFamilyName;
@@ -11,23 +11,23 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author ebin
  */
-public class FormatMiddleLineToCamelIntentionAction extends AbstractFormatIntentionAction {
+public class FormatCamelToUnderLineIntentionAction extends AbstractFormatIntentionAction {
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         String selectedText = editor.getSelectionModel().getSelectedText();
         if (!StringUtils.isEmpty(selectedText)) {
-            return selectedText.contains("-");
+            return !selectedText.contains("_") && !selectedText.contains("-") && hasUpperCase(selectedText);
         }
         return false;
     }
 
     @Override
     public @NotNull @IntentionFamilyName String getFamilyName() {
-        return "* Format middle line to camel";
+        return "* Format camel to underline";
     }
 
     @Override
     protected String formatString(String selectedText) {
-        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, selectedText);
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, selectedText);
     }
 }

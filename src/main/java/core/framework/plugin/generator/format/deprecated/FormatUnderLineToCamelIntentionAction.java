@@ -1,4 +1,4 @@
-package core.framework.plugin.generator.format;
+package core.framework.plugin.generator.format.deprecated;
 
 import com.google.common.base.CaseFormat;
 import com.intellij.codeInspection.util.IntentionFamilyName;

@@ -35,35 +35,7 @@
 
         <intentionAction>
             <language>JAVA</language>
-            <className>core.framework.plugin.generator.format.FormatStyleTextToSentenceIntentionAction</className>
-            <category>CoreNgStylePlugin</category>
-            <skipBeforeAfter>true</skipBeforeAfter>
-        </intentionAction>
-
-        <intentionAction>
-            <language>JAVA</language>
-            <className>core.framework.plugin.generator.format.FormatCamelToUnderLineIntentionAction</className>
-            <category>CoreNgStylePlugin</category>
-            <skipBeforeAfter>true</skipBeforeAfter>
-        </intentionAction>
-
-        <intentionAction>
-            <language>JAVA</language>
-            <className>core.framework.plugin.generator.format.FormatCamelToMiddleLineIntentionAction</className>
-            <category>CoreNgStylePlugin</category>
-            <skipBeforeAfter>true</skipBeforeAfter>
-        </intentionAction>
-
-        <intentionAction>
-            <language>JAVA</language>
-            <className>core.framework.plugin.generator.format.FormatUnderLineToCamelIntentionAction</className>
-            <category>CoreNgStylePlugin</category>
-            <skipBeforeAfter>true</skipBeforeAfter>
-        </intentionAction>
-
-        <intentionAction>
-            <language>JAVA</language>
-            <className>core.framework.plugin.generator.format.FormatMiddleLineToCamelIntentionAction</className>
+            <className>core.framework.plugin.generator.format.FormatTextIntentionAction</className>
             <category>CoreNgStylePlugin</category>
             <skipBeforeAfter>true</skipBeforeAfter>
         </intentionAction>
