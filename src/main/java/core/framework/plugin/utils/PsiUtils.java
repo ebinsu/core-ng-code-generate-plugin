@@ -13,8 +13,10 @@ import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.PsiType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -41,6 +43,17 @@ public final class PsiUtils {
             }
         }
         return false;
+    }
+
+    public static PsiClass findClass(PsiElement statement) {
+        PsiElement maybeClass = statement;
+        do {
+            maybeClass = maybeClass.getParent();
+            if (maybeClass instanceof PsiClass) {
+                return (PsiClass) maybeClass;
+            }
+        } while (maybeClass.getParent() != null);
+        return null;
     }
 
     @NotNull
@@ -108,4 +121,15 @@ public final class PsiUtils {
             ).toList();
     }
 
+    public static String getSourceStyleClassName(PsiClass psiClass) {
+        Deque<String> names = new ArrayDeque<>();
+        PsiClass current = psiClass;
+
+        while (current != null) {
+            names.push(current.getName());
+            current = current.getContainingClass();
+        }
+
+        return String.join(".", names);
+    }
 }

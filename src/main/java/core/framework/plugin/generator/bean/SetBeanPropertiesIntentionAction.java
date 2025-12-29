@@ -17,6 +17,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiReferenceExpression;
@@ -43,8 +44,14 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
             return;
         }
         PsiElement selectBlock = element.getParent();
-        List<PsiElement> methods = PsiUtils.findMethods(element);
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
+        Optional<PsiElement> methodOptional = PsiUtils.findMethod(element);
+        PsiClass aClass = PsiUtils.findClass(element);
+        if (methodOptional.isEmpty() || aClass == null) {
+            return;
+        }
+        PsiElement method = methodOptional.get();
+        boolean isStaticMethod = ((PsiMethod) method).getModifierList().getText().contains("static");
 
         BeanDefinition focusBeanDefinition;
         PsiElement codeLine;
@@ -52,10 +59,8 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
         if (element.getParent() instanceof PsiReferenceExpression) {
             List<BeanDefinition> methodAllVariable = new ArrayList<>();
 
-            for (PsiElement method : methods) {
-                findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
-                findMethodBodyVariable(project, javaPsiFacade, method, null, methodAllVariable, new ArrayList<>());
-            }
+            findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
+            findMethodBodyVariable(project, javaPsiFacade, method, null, methodAllVariable, new ArrayList<>());
             String variableName = element.getParent().getText();
             focusBeanDefinition = methodAllVariable.stream().filter(b -> b.variableName.equals(variableName)).findFirst().orElse(null);
             Optional<PsiElement> optional = PsiUtils.findExpressionStatement(element);
@@ -84,14 +89,14 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
 
         List<BeanDefinition> methodAllVariable = new ArrayList<>();
         List<String> alreadyAssignedFiledNames = new ArrayList<>();
-        for (PsiElement method : methods) {
-            findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
-            findMethodBodyVariable(project, javaPsiFacade, method, focusBeanDefinition, methodAllVariable, alreadyAssignedFiledNames);
-        }
+        findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
+        findMethodBodyVariable(project, javaPsiFacade, method, focusBeanDefinition, methodAllVariable, alreadyAssignedFiledNames);
+
         PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();
 
-        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile, codeLine, focusBeanDefinition, alreadyAssignedFiledNames));
+        ListPopup listPopup = jbPopupFactory.createListPopup(new SetBeanPropertiesBaseListPopupStep(methodAllVariable, project, javaPsiFacade, psiFile,
+            codeLine, focusBeanDefinition, alreadyAssignedFiledNames, aClass, method));
         listPopup.showInBestPositionFor(editor);
     }
 

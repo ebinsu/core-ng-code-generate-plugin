@@ -40,16 +40,28 @@ public class BeanDefinition {
         return displayName;
     }
 
-    public Optional<String> getSimilarityField(String filedName) {
+    public Optional<String> getSimilarityFieldName(String filedName, String fileType) {
         if (fields.containsKey(filedName)) {
             return Optional.of(fields.get(filedName).name);
         }
         String lowerCase = filedName.toLowerCase();
-        return fields.keySet().stream().filter(f -> f.toLowerCase().equals(lowerCase)).findFirst();
+        Optional<String> optional = fields.keySet().stream().filter(f -> f.toLowerCase().equals(lowerCase)).findFirst();
+        if (optional.isPresent()) {
+            return optional;
+        } else {
+            String matchTypeString = fileType.replace("AJAX", "").replace("View", "").toLowerCase();
+            return fields.entrySet().stream().filter(f -> {
+                return f.getValue().simpleTypeName.replace("AJAX", "").replace("View", "").toLowerCase().equals(matchTypeString);
+            }).findFirst().map(Map.Entry::getKey);
+        }
     }
 
     public Optional<String> getFieldType(String filedName) {
         return Optional.ofNullable(fields.get(filedName)).map(m -> m.typeName);
+    }
+
+    public Optional<BeanField> getBeanField(String filedName) {
+        return Optional.ofNullable(fields.get(filedName));
     }
 
     public Optional<String> getSimpleFieldType(String filedName) {
