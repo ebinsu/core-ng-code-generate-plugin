@@ -3,9 +3,9 @@ package core.framework.plugin.generator.format.selection;
 /**
  * @author ebin
  */
-public class FormatToSentence implements FormatSelection {
+public class FormatToLowerSpace implements FormatSelection {
     @Override
     public String displayName() {
-        return "Format To sentence";
+        return "Format To Lower Space";
     }
 }

@@ -51,8 +51,6 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
             return;
         }
         PsiElement method = methodOptional.get();
-        boolean isStaticMethod = ((PsiMethod) method).getModifierList().getText().contains("static");
-
         BeanDefinition focusBeanDefinition;
         PsiElement codeLine;
 

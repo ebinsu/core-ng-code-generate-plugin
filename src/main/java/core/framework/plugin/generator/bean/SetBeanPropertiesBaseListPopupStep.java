@@ -149,7 +149,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
             statements.add(elementFactory.createStatementFromText(statement, psiFile.getContext()));
             return new StatementHolder(statements, addMethods);
         } else {
-            Optional<String> similarityFieldNameOptional = source.getSimilarityFieldName(targetFieldName, targetBeanField.simpleTypeName);
+            Optional<String> similarityFieldNameOptional = source.getSimilarityFieldName(targetFieldName, targetBeanField.typeName, targetBeanField.simpleTypeName);
             if (similarityFieldNameOptional.isPresent()) {
                 String sourceFieldName = similarityFieldNameOptional.get();
                 BeanField sourceBeanField = source.getBeanField(sourceFieldName).get();

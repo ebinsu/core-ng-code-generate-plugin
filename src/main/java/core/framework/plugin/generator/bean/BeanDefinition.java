@@ -2,6 +2,7 @@ package core.framework.plugin.generator.bean;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
+import core.framework.plugin.utils.ClassUtils;
 import core.framework.plugin.utils.PsiUtils;
 
 import java.util.LinkedHashMap;
@@ -40,7 +41,7 @@ public class BeanDefinition {
         return displayName;
     }
 
-    public Optional<String> getSimilarityFieldName(String filedName, String fileType) {
+    public Optional<String> getSimilarityFieldName(String filedName, String fileType, String simpleTypeName) {
         if (fields.containsKey(filedName)) {
             return Optional.of(fields.get(filedName).name);
         }
@@ -48,11 +49,13 @@ public class BeanDefinition {
         Optional<String> optional = fields.keySet().stream().filter(f -> f.toLowerCase().equals(lowerCase)).findFirst();
         if (optional.isPresent()) {
             return optional;
-        } else {
-            String matchTypeString = fileType.replace("AJAX", "").replace("View", "").toLowerCase();
+        } else if (ClassUtils.isJavaBean(fileType) || ClassUtils.isEnum(fileType)) {
+            String matchTypeString = simpleTypeName.replace("AJAX", "").replace("View", "").toLowerCase();
             return fields.entrySet().stream().filter(f -> {
                 return f.getValue().simpleTypeName.replace("AJAX", "").replace("View", "").toLowerCase().equals(matchTypeString);
             }).findFirst().map(Map.Entry::getKey);
+        } else {
+            return Optional.empty();
         }
     }
 
