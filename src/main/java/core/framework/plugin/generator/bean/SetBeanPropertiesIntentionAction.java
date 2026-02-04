@@ -87,8 +87,12 @@ public class SetBeanPropertiesIntentionAction extends PsiElementBaseIntentionAct
 
         List<BeanDefinition> methodAllVariable = new ArrayList<>();
         List<String> alreadyAssignedFiledNames = new ArrayList<>();
-        findMethodParameterVariable(project, javaPsiFacade, method, methodAllVariable);
-        findMethodBodyVariable(project, javaPsiFacade, method, focusBeanDefinition, methodAllVariable, alreadyAssignedFiledNames);
+
+        List<PsiElement> allMethods = PsiUtils.findMethods(element.getParent());
+        for (PsiElement m : allMethods) {
+            findMethodParameterVariable(project, javaPsiFacade, m, methodAllVariable);
+            findMethodBodyVariable(project, javaPsiFacade, m, focusBeanDefinition, methodAllVariable, alreadyAssignedFiledNames);
+        }
 
         PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
         JBPopupFactory jbPopupFactory = JBPopupFactory.getInstance();

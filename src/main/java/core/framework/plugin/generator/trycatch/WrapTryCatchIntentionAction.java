@@ -26,7 +26,7 @@ public class WrapTryCatchIntentionAction extends PsiElementBaseIntentionAction i
             try {
                 %1$s
             } catch (Exception e) {
-                %2$s.warn(Markers.errorCode("ERROR_CODE"), "error message", e);
+                %2$s.warn(Markers.errorCode("ERROR_CODE"), e.getMessage(), e);
             }
         """;
 
