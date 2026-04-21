@@ -9,7 +9,6 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
@@ -44,14 +43,17 @@ public class SqlFileToDomainLineMarkerProvider extends RelatedItemLineMarkerProv
 
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
-        if (element.getParent() != null) {
-            PsiElement parent = element.getParent();
-            if (parent instanceof PsiPlainTextFileImpl file) {
-                if (!"sql".equals(file.getVirtualFile().getExtension())) {
-                    return;
-                }
+        if (element.getParent() == null)
+            return;
+        PsiElement parent = element.getParent();
+        if (parent instanceof PsiPlainTextFileImpl file) {
+            if (!"sql".equals(file.getVirtualFile().getExtension())) {
+                return;
             }
+        } else {
+            return;
         }
+
         String fullText = element.getText();
         if (fullText.startsWith("CREATE TABLE") && element.getParent() != null) {
             Matcher matcher = PATTERN.matcher(fullText);
