@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.intellij.platform' version '2.10.5'
+    id 'org.jetbrains.intellij.platform' version '2.14.0'
 }
 
 group 'core.framework'
-version '3.8.4'
+version '4.0.0'
 
 repositories {
     mavenCentral()
@@ -24,16 +24,16 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.2'
 
     intellijPlatform {
-        intellijIdeaCommunity('2025.2')
+        intellijIdea("2026.1")
         bundledPlugin 'com.intellij.java'
-        instrumentationTools()
+        bundledPlugin 'com.intellij.database'
     }
 }
 
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>fix bugs</li>
+         <li>update intellijIdea to 2026.1</li>
        </ul>
       """
 }

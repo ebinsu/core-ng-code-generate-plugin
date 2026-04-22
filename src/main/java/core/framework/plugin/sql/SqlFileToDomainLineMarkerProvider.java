@@ -20,7 +20,6 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.impl.JavaPsiFacadeImpl;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
-import com.intellij.psi.impl.source.PsiPlainTextFileImpl;
 import com.intellij.psi.impl.source.tree.java.PsiNameValuePairImpl;
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -43,82 +42,77 @@ public class SqlFileToDomainLineMarkerProvider extends RelatedItemLineMarkerProv
 
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
-        if (element.getParent() == null)
+        if (element.getParent() == null || !element.getText().startsWith("CREATE TABLE"))
             return;
         PsiElement parent = element.getParent();
-        if (parent instanceof PsiPlainTextFileImpl file) {
-            if (!"sql".equals(file.getVirtualFile().getExtension())) {
-                return;
-            }
-        } else {
+
+        if (!element.getLanguage().getID().equals("GenericSQL")) {
             return;
         }
 
-        String fullText = element.getText();
-        if (fullText.startsWith("CREATE TABLE") && element.getParent() != null) {
-            Matcher matcher = PATTERN.matcher(fullText);
-            if (matcher.find()) {
-                Project project = element.getProject();
-                JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
+        String fullText = parent.getText();
+        Matcher matcher = PATTERN.matcher(fullText);
+        if (matcher.find()) {
+            Project project = element.getProject();
+            JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
 
-                String group = matcher.group();
-                String tableName = group.substring(group.indexOf("`")).replace("`", "");
+            String group = matcher.group();
+            String tableName = group.substring(group.indexOf("`")).replace("`", "");
 
-                String path = getPath(element);
-                //eg: C:/workspace/shipping-project/backend/shipping-service-db-migration/src/main/resources/db/migration
-                if (path == null) {
-                    return;
-                }
-                int index = path.indexOf(MIGRATE_EXT);
-                if (index == -1) {
-                    return;
-                }
-                path = path.substring(0, index + MIGRATE_EXT.length());
-                path = path.replace("-db-migration", "");
-                //eg: C:/workspace/shipping-project/backend/shipping-service
-                path += "/src/main/java/app";
+            String path = getPath(element);
+            //eg: C:/workspace/shipping-project/backend/shipping-service-db-migration/src/main/resources/db/migration
+            if (path == null) {
+                return;
+            }
+            int index = path.indexOf(MIGRATE_EXT);
+            if (index == -1) {
+                return;
+            }
+            path = path.substring(0, index + MIGRATE_EXT.length());
+            path = path.replace("-db-migration", "");
+            //eg: C:/workspace/shipping-project/backend/shipping-service
+            path += "/src/main/java/app";
 
-                VirtualFile appPath = VfsUtil.findFileByIoFile(new File(path), true);
-                if (appPath == null) {
-                    return;
+            VirtualFile appPath = VfsUtil.findFileByIoFile(new File(path), true);
+            if (appPath == null) {
+                return;
+            }
+            List<VirtualFile> virtualFiles = VfsUtil.collectChildrenRecursively(appPath);
+            String finalPath = path;
+            List<String> domainPackageNames = virtualFiles.stream()
+                .filter(f -> f.getPath().contains("domain"))
+                .map(m -> ("app" + m.getPath().replace(finalPath, "")).replace("/", "."))
+                .toList();
+            GlobalSearchScope globalSearchScope = GlobalSearchScope.allScope(element.getProject());
+            PsiClass targetPsiClass = null;
+            for (String domainPackageName : domainPackageNames) {
+                PsiPackage aPackage = javaPsiFacade.findPackage(domainPackageName);
+                if (aPackage == null) {
+                    continue;
                 }
-                List<VirtualFile> virtualFiles = VfsUtil.collectChildrenRecursively(appPath);
-                String finalPath = path;
-                List<String> domainPackageNames = virtualFiles.stream()
-                    .filter(f -> f.getPath().contains("domain"))
-                    .map(m -> ("app" + m.getPath().replace(finalPath, "")).replace("/", "."))
-                    .toList();
-                GlobalSearchScope globalSearchScope = GlobalSearchScope.allScope(element.getProject());
-                PsiClass targetPsiClass = null;
-                for (String domainPackageName : domainPackageNames) {
-                    PsiPackage aPackage = javaPsiFacade.findPackage(domainPackageName);
-                    if (aPackage == null) {
+                Set<String> classNames = ((JavaPsiFacadeImpl) javaPsiFacade).getClassNames(aPackage, globalSearchScope);
+                for (String className : classNames) {
+                    PsiClass psiClass = javaPsiFacade.findClass(domainPackageName + "." + className, globalSearchScope);
+                    if (psiClass == null) {
                         continue;
                     }
-                    Set<String> classNames = ((JavaPsiFacadeImpl) javaPsiFacade).getClassNames(aPackage, globalSearchScope);
-                    for (String className : classNames) {
-                        PsiClass psiClass = javaPsiFacade.findClass(domainPackageName + "." + className, globalSearchScope);
-                        if (psiClass == null) {
-                            continue;
-                        }
-                        PsiAnnotation[] annotations = psiClass.getAnnotations();
-                        String annTableName = findTableName(javaPsiFacade, annotations, globalSearchScope);
-                        if (tableName.equals(annTableName)) {
-                            targetPsiClass = psiClass;
-                            break;
-                        }
-                    }
-                    if (targetPsiClass != null) {
+                    PsiAnnotation[] annotations = psiClass.getAnnotations();
+                    String annTableName = findTableName(javaPsiFacade, annotations, globalSearchScope);
+                    if (tableName.equals(annTableName)) {
+                        targetPsiClass = psiClass;
                         break;
                     }
                 }
                 if (targetPsiClass != null) {
-                    NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.FileTypes.Java)
-                        .setTarget(targetPsiClass)
-                        .setTooltipText("Navigate to " + targetPsiClass.getQualifiedName())
-                        .setAlignment(GutterIconRenderer.Alignment.CENTER);
-                    result.add(builder.createLineMarkerInfo(element.getParent()));
+                    break;
                 }
+            }
+            if (targetPsiClass != null) {
+                NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(AllIcons.FileTypes.Java)
+                    .setTarget(targetPsiClass)
+                    .setTooltipText("Navigate to " + targetPsiClass.getQualifiedName())
+                    .setAlignment(GutterIconRenderer.Alignment.CENTER);
+                result.add(builder.createLineMarkerInfo(element));
             }
         }
     }
