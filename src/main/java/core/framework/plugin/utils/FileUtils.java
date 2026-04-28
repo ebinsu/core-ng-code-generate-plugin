@@ -12,4 +12,9 @@ public final class FileUtils {
         String extension = FilenameUtils.getExtension(fileName);
         return extension.equals("json");
     }
+
+    public static boolean isJavaFile(String fileName) {
+        String extension = FilenameUtils.getExtension(fileName);
+        return extension.equals("java");
+    }
 }

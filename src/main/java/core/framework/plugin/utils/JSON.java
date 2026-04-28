@@ -46,4 +46,14 @@ public final class JSON {
             throw new UncheckedIOException(e);
         }
     }
+
+    public static String toPrettyJSON(Object instance) {
+        try {
+            return JSONMapper.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(instance);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+
 }

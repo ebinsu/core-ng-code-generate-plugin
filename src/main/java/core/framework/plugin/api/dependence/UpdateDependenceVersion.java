@@ -1,4 +1,4 @@
-package core.framework.plugin.dependence;
+package core.framework.plugin.api.dependence;
 
 import com.intellij.ide.actions.EditSourceAction;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -17,6 +17,7 @@ import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import core.framework.plugin.api.TextAreaDialogWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;

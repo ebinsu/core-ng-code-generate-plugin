@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '4.0.0'
+version '4.1.0'
 
 repositories {
     mavenCentral()
@@ -22,21 +22,32 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '33.3.1-jre'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.2'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.2'
+    implementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.16'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.21.0'
 
     intellijPlatform {
         intellijIdea("2026.1")
         bundledPlugin 'com.intellij.java'
         bundledPlugin 'com.intellij.database'
+        bundledPlugin 'com.intellij.modules.vcs'
+        bundledPlugin 'Git4Idea'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>update intellijIdea to 2026.1</li>
+         <li>add release api</li>
        </ul>
       """
 }
+
 test {
     useJUnitPlatform()
 }

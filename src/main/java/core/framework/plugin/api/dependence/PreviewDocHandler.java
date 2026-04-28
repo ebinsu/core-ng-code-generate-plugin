@@ -1,4 +1,4 @@
-package core.framework.plugin.dependence;
+package core.framework.plugin.api.dependence;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;

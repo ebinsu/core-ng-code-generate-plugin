@@ -1,7 +1,6 @@
-package core.framework.plugin.dependence;
+package core.framework.plugin.api;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 

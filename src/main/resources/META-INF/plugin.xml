@@ -12,6 +12,7 @@
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
@@ -66,7 +67,7 @@
     <actions>
         <!-- Add your actions here -->
         <action id="DomainToSqlFileGenerator" class="core.framework.plugin.sql.DomainToSqlFileGenerator"
-                text="New Sql File For Domain"
+                text="New Sql File for Domain"
                 description="Domain to sql file" icon="AllIcons.FileTypes.Text">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
@@ -86,6 +87,11 @@
             <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="Generate"/>
         </action>
 
+        <action id="ReleaseApiAction" class="core.framework.plugin.api.release.ReleaseApiAction"
+                text="Release API" description="Release API"
+                icon="com.intellij.icons.AllIcons.Actions.GroupBy">
+            <add-to-group group-id="Dvcs.Log.ContextMenu" anchor="last"/>
+        </action>
 
         <action id="CopyEnumGenerator" class="core.framework.plugin.generator.enums.CopyEnumGenerator" text="Copy Enum"
                 description="CopyEnumGenerator" icon="AllIcons.Nodes.Enum">
@@ -97,7 +103,7 @@
                 description="NewEnvPropertiesFile" icon="AllIcons.Nodes.Property">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
-        <action id="UpdateDependenceVersion" class="core.framework.plugin.dependence.UpdateDependenceVersion"
+        <action id="UpdateDependenceVersion" class="core.framework.plugin.api.dependence.UpdateDependenceVersion"
                 text="Update Dependence Version" description="Update dependence version"
                 icon="AllIcons.Ide.Notification.IdeUpdate">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="VersionControlsGroup"/>
