@@ -20,6 +20,9 @@
                                         implementationClass="core.framework.plugin.sql.DomainToSqlLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="GenericSQL"
                                         implementationClass="core.framework.plugin.sql.SqlFileToDomainLineMarkerProvider"/>
+        <codeInsight.inlayProvider language="JAVA"
+                                   implementationClass="core.framework.plugin.api.link.ActionLinkProvider"/>
+
         <intentionAction>
             <language>JAVA</language>
             <className>core.framework.plugin.generator.bean.SetBeanPropertiesIntentionAction</className>

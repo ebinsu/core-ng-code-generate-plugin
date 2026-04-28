@@ -44,6 +44,7 @@ patchPluginXml {
     changeNotes = """
       <ul>
          <li>add release api</li>
+         <li>web service add action log link</li>
        </ul>
       """
 }
