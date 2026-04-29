@@ -28,6 +28,7 @@ import git4idea.commands.GitLineHandler;
 import git4idea.commands.GitLineHandlerListener;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -111,21 +112,27 @@ public class ReleaseApiAction extends AnAction implements DumbAware {
 
                 String summary = diffResults.stream().map(ModuleDiff.Result::toSummary).collect(Collectors.joining("\n"));
 
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change", "");
-                    historyDialog.setInputText(changeResult + "\n==============\n" + noneChangeResult);
-                    historyDialog.show();
-                    if (historyDialog.cancel) {
-                        return;
-                    }
-                    WriteCommandAction.runWriteCommandAction(project, () -> {
-                        //UPDATE publish.json
-                        publishJSONDoc.replaceString(0, lineEndOffset, publishJSONContext);
+                if (!StringUtils.isEmpty(changeResult)) {
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        TextAreaDialogWrapper historyDialog = new TextAreaDialogWrapper("Preview Change", "");
+                        historyDialog.setInputText(changeResult + "\n==============\n" + noneChangeResult);
+                        historyDialog.show();
+                        if (historyDialog.cancel) {
+                            return;
+                        }
+                        WriteCommandAction.runWriteCommandAction(project, () -> {
+                            //UPDATE publish.json
+                            publishJSONDoc.replaceString(0, lineEndOffset, publishJSONContext);
+                        });
+                        TextAreaDialogWrapper resultDialog = new TextAreaDialogWrapper("API Change Please review", "");
+                        resultDialog.setInputText(summary);
+                        resultDialog.show();
                     });
+                } else {
                     TextAreaDialogWrapper resultDialog = new TextAreaDialogWrapper("API Change Please review", "");
                     resultDialog.setInputText(summary);
                     resultDialog.show();
-                });
+                }
             }
         }.queue();
     }
