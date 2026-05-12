@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '4.1.1'
+version '4.1.2'
 
 repositories {
     mavenCentral()
@@ -43,8 +43,7 @@ java {
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>add release api</li>
-         <li>web service add action log link</li>
+         <li>fix bug</li>
        </ul>
       """
 }

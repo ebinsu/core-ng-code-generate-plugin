@@ -33,20 +33,16 @@ public class ModuleDiff {
 
     private static void calculateChange(ClassDiff clazz, Result result) {
         if (ClassDiff.Type.ENUM == clazz.type) {
-            result.breakingReason.add(clazz.className + " added enum values: " + StringUtils.truncate(String.join(",", clazz.addFields.keySet()), 40));
+            if (!clazz.addFields.isEmpty()) {
+                result.breakingReason.add(clazz.className + " added enum values: " + StringUtils.truncate(String.join(",", clazz.addFields.keySet()), 40));
+            }
         } else {
             clazz.addFields.forEach((fieldName, annotations) -> {
                 if (annotations.stream().anyMatch(a -> a.contains("@Property"))) {
                     if (annotations.stream().anyMatch(a -> a.contains("@NotNull"))) {
                         result.breakingReason.add(clazz.className + " added @NotNull field: " + fieldName);
-                    } else if (annotations.stream().anyMatch(a -> a.contains("@NotBlank"))) {
-                        result.minorReason.add(clazz.className + " added @NotBlank field: " + fieldName);
-                    } else if (annotations.stream().anyMatch(a -> a.contains("@Size"))) {
-                        result.minorReason.add(clazz.className + " added @Size field: " + fieldName);
-                    } else if (annotations.stream().anyMatch(a -> a.contains("@Min"))) {
-                        result.minorReason.add(clazz.className + " added @Min field: " + fieldName);
-                    } else if (annotations.stream().anyMatch(a -> a.contains("@Max"))) {
-                        result.minorReason.add(clazz.className + " added @Max field: " + fieldName);
+                    } else {
+                        result.minorReason.add(clazz.className + " added nullable field: " + fieldName);
                     }
                 }
             });

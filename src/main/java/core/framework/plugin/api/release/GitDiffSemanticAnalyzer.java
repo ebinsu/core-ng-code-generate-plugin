@@ -148,8 +148,8 @@ public class GitDiffSemanticAnalyzer {
                 annotationDiff.deleteAnnotations.addAll(newAnno);
                 annotationDiff.deleteAnnotations.removeAll(oldAnno);
 
-                annotationDiff.addAnnotations.addAll(oldAnno);
-                annotationDiff.addAnnotations.removeAll(newAnno);
+                annotationDiff.addAnnotations.addAll(newAnno);
+                annotationDiff.addAnnotations.removeAll(oldAnno);
 
                 if (annotationDiff.hasDiff()) {
                     classDiff.fieldChanges.put(field.name, annotationDiff);
