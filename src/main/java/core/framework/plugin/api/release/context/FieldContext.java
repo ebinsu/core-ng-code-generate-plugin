@@ -8,9 +8,11 @@ import java.util.List;
 public class FieldContext {
     public String name;
     public List<String> annotations;
+    public boolean hasDefaultValue;
 
-    public FieldContext(String fieldName, List<String> annotations) {
+    public FieldContext(String fieldName, List<String> annotations, boolean hasDefaultValue) {
         this.name = fieldName;
         this.annotations = annotations;
+        this.hasDefaultValue = hasDefaultValue;
     }
 }

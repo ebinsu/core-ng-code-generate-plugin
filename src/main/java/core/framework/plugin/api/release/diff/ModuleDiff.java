@@ -37,10 +37,14 @@ public class ModuleDiff {
                 result.breakingReason.add(clazz.className + " added enum values: " + StringUtils.truncate(String.join(",", clazz.addFields.keySet()), 40));
             }
         } else {
-            clazz.addFields.forEach((fieldName, annotations) -> {
-                if (annotations.stream().anyMatch(a -> a.contains("@Property"))) {
-                    if (annotations.stream().anyMatch(a -> a.contains("@NotNull"))) {
-                        result.breakingReason.add(clazz.className + " added @NotNull field: " + fieldName);
+            clazz.addFields.forEach((fieldName, fieldContext) -> {
+                if (fieldContext.annotations.stream().anyMatch(a -> a.contains("@Property"))) {
+                    if (fieldContext.annotations.stream().anyMatch(a -> a.contains("@NotNull"))) {
+                        if (fieldContext.hasDefaultValue) {
+                            result.minorReason.add(clazz.className + " added @NotNull field (has default value) : " + fieldName);
+                        } else {
+                            result.breakingReason.add(clazz.className + " added @NotNull field: " + fieldName);
+                        }
                     } else {
                         result.minorReason.add(clazz.className + " added nullable field: " + fieldName);
                     }

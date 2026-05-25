@@ -158,7 +158,7 @@ public class GitDiffSemanticAnalyzer {
         }
         for (FieldContext field : newClassDef.fieldList) {
             if (!fieldsInOld.contains(field.name)) {
-                classDiff.addFields.put(field.name, field.annotations);
+                classDiff.addFields.put(field.name, field);
             }
         }
 
@@ -247,7 +247,7 @@ public class GitDiffSemanticAnalyzer {
                 Matcher fieldMatcher = FIELD_REG.matcher(line.trim());
                 if (fieldMatcher.find()) {
                     String fieldName = fieldMatcher.group(2);
-                    FieldContext filedContext = new FieldContext(fieldName, extractFieldAnnotations(i, lines));
+                    FieldContext filedContext = new FieldContext(fieldName, extractFieldAnnotations(i, lines), line.contains("="));
                     if (innerClass != null) {
                         innerClass.fieldList.add(filedContext);
                     } else if (mainClass != null) {
@@ -260,7 +260,7 @@ public class GitDiffSemanticAnalyzer {
                     Matcher enumMatcher = ENUM_VALUE_REG.matcher(line.trim());
                     if (enumMatcher.find()) {
                         String enumValueName = enumMatcher.group(2);
-                        FieldContext filedContext = new FieldContext(enumValueName, extractFieldAnnotations(i, lines));
+                        FieldContext filedContext = new FieldContext(enumValueName, extractFieldAnnotations(i, lines), true);
                         if (innerClass != null) {
                             innerClass.fieldList.add(filedContext);
                         } else {
@@ -273,7 +273,7 @@ public class GitDiffSemanticAnalyzer {
                 Matcher interfaceConstMatcher = INTERFACE_CONST_REG.matcher(line.trim());
                 if (interfaceConstMatcher.find()) {
                     String fieldName = interfaceConstMatcher.group(1);
-                    FieldContext filedContext = new FieldContext(fieldName, extractFieldAnnotations(i, lines));
+                    FieldContext filedContext = new FieldContext(fieldName, extractFieldAnnotations(i, lines), line.contains("="));
                     if (innerClass != null) {
                         innerClass.fieldList.add(filedContext);
                     } else if (mainClass != null) {

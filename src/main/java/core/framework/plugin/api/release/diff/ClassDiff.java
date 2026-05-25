@@ -1,5 +1,7 @@
 package core.framework.plugin.api.release.diff;
 
+import core.framework.plugin.api.release.context.FieldContext;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.Map;
 public class ClassDiff {
     public String className;
     public Type type;
-    public Map<String, List<String>> addFields = new LinkedHashMap<>(); // filed name / annotation
+    public Map<String, FieldContext> addFields = new LinkedHashMap<>(); // filed name / annotation
     public Map<String, List<String>> deleteFields = new LinkedHashMap<>(); // filed name / annotation
     public Map<String, AnnotationDiff> fieldChanges = new LinkedHashMap<>(); // filed name / annotation
 
