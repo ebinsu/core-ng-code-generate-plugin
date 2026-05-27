@@ -95,9 +95,12 @@ public class ReleaseApiAction extends AnAction implements DumbAware {
                     GitCommandResult result = Git.getInstance().runCommand(handler);
 
                     if (result.success()) {
-                        ModuleDiff moduleDiff = GitDiffSemanticAnalyzer.analyze(result.getOutputAsJoinedString());
-                        moduleDiff.module = module;
-                        moduleDiffList.add(moduleDiff);
+                        String outputAsJoinedString = result.getOutputAsJoinedString();
+                        if (!StringUtils.isEmpty(outputAsJoinedString)) {
+                            ModuleDiff moduleDiff = GitDiffSemanticAnalyzer.analyze(result.getOutputAsJoinedString());
+                            moduleDiff.module = module;
+                            moduleDiffList.add(moduleDiff);
+                        }
                     }
                 });
                 List<ModuleDiff.Result> diffResults = moduleDiffList.stream().map(ModuleDiff::analyze).toList();
@@ -129,9 +132,17 @@ public class ReleaseApiAction extends AnAction implements DumbAware {
                         resultDialog.show();
                     });
                 } else {
-                    TextAreaDialogWrapper resultDialog = new TextAreaDialogWrapper("API Change Please review", "");
-                    resultDialog.setInputText(summary);
-                    resultDialog.show();
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        String finalSummary;
+                        if (StringUtils.isEmpty(summary)) {
+                            finalSummary = publishJSONDTO.modules.stream().map(m -> m.artifactId + " NONE " + m.version).collect(Collectors.joining("\n"));
+                        } else {
+                            finalSummary = summary;
+                        }
+                        TextAreaDialogWrapper resultDialog = new TextAreaDialogWrapper("API Change Please review", "");
+                        resultDialog.setInputText(finalSummary);
+                        resultDialog.show();
+                    });
                 }
             }
         }.queue();
