@@ -10,7 +10,6 @@ target/
 *.iml
 *.ipr
 /.gradle
-self-update.lock
 
 ### NetBeans ###
 /nbproject/private/
@@ -27,4 +26,4 @@ build/
 
 .intellijPlatform
 
-self-update.lock
+.intellijPlatform/
