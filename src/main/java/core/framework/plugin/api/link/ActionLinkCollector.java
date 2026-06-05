@@ -28,8 +28,9 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class ActionLinkCollector extends FactoryInlayHintsCollector {
+    private static final Pattern DATA_DOG_PARAM_PATTERN = Pattern.compile(":[^/]+");
     private final static Pattern PATTERN = Pattern.compile("([^/\\\\]+)(?=-interface)");
-    private final static String DATADOG_URL_TPL = "https://us3.datadoghq.com/apm/traces?query=env:prod service:%1$s resource_name:\"api:%2$s:%3$s\"";
+    private final static String DATADOG_URL_TPL = "https://us3.datadoghq.com/apm/traces?query=env:prod service:%1$s resource_name:\"%2$s\"";
     private final static String KIBANA_TPL = "api:%2$s:%3$s";
 
     public ActionLinkCollector(@NotNull Editor editor) {
@@ -104,7 +105,8 @@ public class ActionLinkCollector extends FactoryInlayHintsCollector {
 
             var factory = getFactory();
 
-            String datadogUrl = String.format(DATADOG_URL_TPL, serviceName, httpMethodType, pathValue);
+            String resourceName = httpMethodType.toUpperCase() + " " + DATA_DOG_PARAM_PATTERN.matcher(pathValue).replaceAll("?");
+            String datadogUrl = String.format(DATADOG_URL_TPL, serviceName, resourceName);
             InlayPresentation datadogInline = datadogInlay(factory, datadogUrl);
 
             String kibanaAction = String.format(KIBANA_TPL, serviceName, httpMethodType, pathValue);
