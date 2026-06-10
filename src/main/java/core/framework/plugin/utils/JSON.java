@@ -49,7 +49,7 @@ public final class JSON {
 
     public static String toPrettyJSON(Object instance) {
         try {
-            return JSONMapper.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(instance);
+            return JSONMapper.OBJECT_MAPPER.writer(JsonStyleUtil.getCustomPrinter()).writeValueAsString(instance);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

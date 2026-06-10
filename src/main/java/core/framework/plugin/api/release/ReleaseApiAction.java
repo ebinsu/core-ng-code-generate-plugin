@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -93,15 +94,18 @@ public class ReleaseApiAction extends AnAction implements DumbAware {
                     handler.addParameters(commitHash, "develop", "--", path);
 
                     GitCommandResult result = Git.getInstance().runCommand(handler);
-
+                    ModuleDiff moduleDiff = null;
                     if (result.success()) {
                         String outputAsJoinedString = result.getOutputAsJoinedString();
                         if (!StringUtils.isEmpty(outputAsJoinedString)) {
-                            ModuleDiff moduleDiff = GitDiffSemanticAnalyzer.analyze(result.getOutputAsJoinedString());
-                            moduleDiff.module = module;
-                            moduleDiffList.add(moduleDiff);
+                            moduleDiff = GitDiffSemanticAnalyzer.analyze(result.getOutputAsJoinedString());
                         }
                     }
+                    if (moduleDiff == null) {
+                        moduleDiff = new ModuleDiff();
+                    }
+                    moduleDiff.module = module;
+                    moduleDiffList.add(moduleDiff);
                 });
                 List<ModuleDiff.Result> diffResults = moduleDiffList.stream().map(ModuleDiff::analyze).toList();
 
@@ -113,7 +117,10 @@ public class ReleaseApiAction extends AnAction implements DumbAware {
                 String publishJSONContext = StringUtil.convertLineSeparators(JSON.toPrettyJSON(publishJSON));
                 int lineEndOffset = publishJSONDoc.getLineEndOffset(Math.max(publishJSONDoc.getLineCount() - 1, 0));
 
-                String summary = diffResults.stream().map(ModuleDiff.Result::toSummary).collect(Collectors.joining("\n"));
+                String summary = diffResults.stream()
+                    .sorted(Comparator.comparingInt(r -> r.level.ordinal()))
+                    .map(ModuleDiff.Result::toSummary)
+                    .collect(Collectors.joining("\n"));
 
                 if (!StringUtils.isEmpty(changeResult)) {
                     ApplicationManager.getApplication().invokeLater(() -> {
