@@ -20,7 +20,7 @@ dependencies {
     implementation "org.atteo:evo-inflector:2.0"
     implementation "com.alibaba:druid:1.2.28"
     implementation "com.google.guava:guava:33.6.0-jre"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.18.2"
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.21.1'
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2"
     implementation "io.github.java-diff-utils:java-diff-utils:4.17"
     implementation "commons-io:commons-io:2.22.0"
