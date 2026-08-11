@@ -79,6 +79,7 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
         this.target = target;
         this.alreadyAssignedFiledNames = alreadyAssignedFiledNames;
         this.elementFactory = PsiElementFactory.getInstance(project);
+        listValues.add(new ExpandNullBeanDefinition());
         listValues.add(new NullBeanDefinition());
         init("Select Local Variable To Set Properties :", listValues, null);
     }
@@ -90,12 +91,31 @@ public class SetBeanPropertiesBaseListPopupStep extends BaseListPopupStep<BeanDe
 
     @Override
     public @Nullable PopupStep<?> onChosen(BeanDefinition selectedValue, boolean finalChoice) {
-        if (selectedValue instanceof NullBeanDefinition) {
+        if (selectedValue instanceof ExpandNullBeanDefinition) {
             generateExpandPropertiesSetNull();
+        } else if (selectedValue instanceof NullBeanDefinition) {
+            generatePropertiesSetNull();
         } else {
             generate(selectedValue);
         }
         return super.onChosen(selectedValue, finalChoice);
+    }
+
+    private void generatePropertiesSetNull() {
+        List<PsiStatement> statements = new ArrayList<>();
+        target.fields.forEach((fieldName, type) -> {
+            if (alreadyAssignedFiledNames.contains(fieldName)) {
+                return;
+            }
+            String statementStr = String.format(NON_PROPERTIES_TEMPLATE, target.variableName, fieldName);
+            statements.add(elementFactory.createStatementFromText(statementStr, psiFile.getContext()));
+        });
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+            Collections.reverse(statements);
+            for (PsiStatement addStatement : statements) {
+                statement.getParent().addAfter(addStatement, statement);
+            }
+        });
     }
 
     private void generateExpandPropertiesSetNull() {

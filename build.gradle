@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'core.framework'
-version '4.1.7'
+version '4.2.0'
 
 repositories {
     mavenCentral()
@@ -14,8 +14,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.0'
     implementation "org.apache.commons:commons-text:1.15.0"
     implementation "org.atteo:evo-inflector:2.0"
     implementation "com.alibaba:druid:1.2.28"
@@ -26,7 +27,7 @@ dependencies {
     implementation "commons-io:commons-io:2.22.0"
 
     intellijPlatform {
-        intellijIdea("2026.1")
+        intellijIdea("2026.2")
         bundledPlugin 'com.intellij.java'
         bundledPlugin 'com.intellij.database'
         bundledPlugin 'com.intellij.modules.vcs'
@@ -36,18 +37,19 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 patchPluginXml {
     changeNotes = """
       <ul>
-         <li>fix bug</li>
+         <li>update intellijIdea to 2026.2</li>
        </ul>
       """
 }
 
 test {
     useJUnitPlatform()
+    failOnNoDiscoveredTests = false
 }
